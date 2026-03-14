@@ -1,0 +1,19 @@
+{
+  "projectName": "sds-manager",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "pnpm",
+  "mode": "file-router",
+  "addOnOptions": {},
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "shadcn",
+    "tanstack-query",
+    "form",
+    "eslint",
+    "t3env",
+    "cloudflare"
+  ]
+}
