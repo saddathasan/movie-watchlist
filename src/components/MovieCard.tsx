@@ -1,9 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { BookmarkPlus, BookmarkMinus, Star, Calendar } from 'lucide-react'
-import { Card, CardContent } from '#/components/ui/card'
-import { Badge } from '#/components/ui/badge'
-import { Button } from '#/components/ui/button'
+import { Plus, Check, Star, Film } from 'lucide-react'
 import { posterUrl, type TMDBMovie } from '#/lib/tmdb'
 import { useAuth } from '#/integrations/auth/provider'
 import { useWatchlist } from '#/hooks/useWatchlist'
@@ -14,21 +11,18 @@ interface MovieCardProps {
   index?: number
 }
 
-const PLACEHOLDER = '/placeholder-poster.svg'
-
 export function MovieCard({ movie, index = 0 }: MovieCardProps) {
   const { user } = useAuth()
   const { isInWatchlist, toggleWatchlist } = useWatchlist()
   const inList = isInWatchlist(movie.id)
   const poster = posterUrl(movie.poster_path, 'w342')
-  const year = movie.release_date ? movie.release_date.slice(0, 4) : '—'
-  const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'
+  const year = movie.release_date?.split('-')[0] || 'N/A'
 
   const handleWatchlist = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user) {
-      toast.error('Sign in to manage your watchlist')
+      toast.error('Please log in to use your watchlist')
       return
     }
     await toggleWatchlist({
@@ -38,84 +32,75 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
       release_date: movie.release_date,
       vote_average: movie.vote_average,
     })
-    toast.success(inList ? 'Removed from watchlist' : 'Added to watchlist')
+    toast.success(inList ? 'Removed from watchlist' : 'Added to watchlist!')
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+      transition={{ delay: index * 0.05, duration: 0.4 }}
     >
-      <Card className="group overflow-hidden border-border/50 bg-card hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col p-0">
-        {/* Poster */}
-        <Link to="/movie/$id" params={{ id: String(movie.id) }} className="block relative overflow-hidden aspect-[2/3] flex-shrink-0">
-          <img
-            src={poster ?? PLACEHOLDER}
-            alt={movie.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            onError={(e) => {
-              ;(e.target as HTMLImageElement).src = PLACEHOLDER
-            }}
-          />
-          {/* Rating badge */}
-          <div className="absolute top-2 left-2">
-            <Badge className="gap-1 bg-black/70 text-white border-0 backdrop-blur-sm text-xs">
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              {rating}
-            </Badge>
+      <Link to="/movie/$id" params={{ id: String(movie.id) }} className="group block">
+        <div className="relative overflow-hidden rounded-lg bg-surface shadow-card transition-all duration-300 group-hover:shadow-glow group-hover:-translate-y-1">
+          {/* Poster */}
+          <div className="aspect-[2/3] overflow-hidden">
+            {poster ? (
+              <img
+                src={poster}
+                alt={movie.title}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-secondary">
+                <Film className="h-12 w-12 text-muted-foreground" />
+              </div>
+            )}
+            {/* Hover gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
-          {/* Watchlist overlay */}
-          <motion.button
+
+          {/* Rating badge */}
+          {movie.vote_average > 0 && (
+            <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-xs font-semibold backdrop-blur-sm">
+              <Star className="h-3 w-3 fill-primary text-primary" />
+              {movie.vote_average.toFixed(1)}
+            </div>
+          )}
+
+          {/* Watchlist button */}
+          <button
             onClick={handleWatchlist}
-            whileTap={{ scale: 0.9 }}
-            className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-sm transition-all duration-200 ${
+            className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 ${
               inList
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-black/50 text-white hover:bg-primary hover:text-primary-foreground'
+                : 'bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground'
             }`}
             aria-label={inList ? 'Remove from watchlist' : 'Add to watchlist'}
           >
-            {inList ? (
-              <BookmarkMinus className="w-4 h-4" />
-            ) : (
-              <BookmarkPlus className="w-4 h-4" />
-            )}
-          </motion.button>
-        </Link>
+            {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          </button>
 
-        {/* Info */}
-        <CardContent className="p-3 flex flex-col flex-1 gap-2">
-          <Link to="/movie/$id" params={{ id: String(movie.id) }}>
-            <h3 className="font-semibold text-sm leading-tight line-clamp-2 hover:text-primary transition-colors">
-              {movie.title}
-            </h3>
-          </Link>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-auto">
-            <Calendar className="w-3 h-3" />
-            <span>{year}</span>
+          {/* Info */}
+          <div className="p-3">
+            <h3 className="font-semibold text-sm text-foreground truncate">{movie.title}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{year}</p>
           </div>
-          <Link to="/movie/$id" params={{ id: String(movie.id) }}>
-            <Button variant="secondary" size="sm" className="w-full text-xs h-7 mt-1">
-              View Details
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+        </div>
+      </Link>
     </motion.div>
   )
 }
 
 export function MovieCardSkeleton() {
   return (
-    <Card className="overflow-hidden border-border/50 p-0">
-      <div className="aspect-[2/3] bg-muted animate-pulse" />
-      <CardContent className="p-3 flex flex-col gap-2">
-        <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
-        <div className="h-3 bg-muted animate-pulse rounded w-1/3" />
-        <div className="h-7 bg-muted animate-pulse rounded mt-1" />
-      </CardContent>
-    </Card>
+    <div className="overflow-hidden rounded-lg bg-surface shadow-card">
+      <div className="aspect-[2/3] bg-secondary animate-pulse" />
+      <div className="p-3 flex flex-col gap-2">
+        <div className="h-4 bg-secondary animate-pulse rounded w-3/4" />
+        <div className="h-3 bg-secondary animate-pulse rounded w-1/3" />
+      </div>
+    </div>
   )
 }
