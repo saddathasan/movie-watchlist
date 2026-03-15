@@ -1,6 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   --background: 0.13 0.02 255;
@@ -124,6 +124,14 @@
   }
   .gradient-overlay {
     background: linear-gradient(to top, oklch(0.13 0.02 255) 0%, transparent 100%);
+  }
+  .hover-gradient-gold {
+    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  }
+  .hover-gradient-gold:hover {
+    background: linear-gradient(135deg, oklch(0.75 0.15 75), oklch(0.68 0.16 65));
+    color: oklch(var(--primary-foreground));
+    border-color: transparent;
   }
 }
 

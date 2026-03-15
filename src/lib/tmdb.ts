@@ -36,6 +36,11 @@ export function backdropUrl(backdropPath: string | null, size: 'w780' | 'w1280' 
   return `${IMAGE_BASE}/${size}${backdropPath}`
 }
 
+export function profileUrl(profilePath: string | null, size: 'w45' | 'w185' | 'h632' | 'original' = 'w185') {
+  if (!profilePath) return null
+  return `${IMAGE_BASE}/${size}${profilePath}`
+}
+
 // --- Types ---
 export interface TMDBMovie {
   id: number
@@ -50,7 +55,24 @@ export interface TMDBMovie {
   popularity: number
 }
 
-export interface TMDBMovieDetail extends TMDBMovie {
+export interface TMDBCastMember {
+  id: number
+  name: string
+  character: string
+  profile_path: string | null
+  order: number
+}
+
+export interface TMDBVideo {
+  id: string
+  key: string
+  name: string
+  site: string
+  type: string
+  official: boolean
+}
+
+export interface TMDBMovieDetails extends TMDBMovie {
   genres: { id: number; name: string }[]
   runtime: number | null
   tagline: string | null
@@ -60,6 +82,12 @@ export interface TMDBMovieDetail extends TMDBMovie {
   budget: number
   revenue: number
   production_companies: { id: number; name: string; logo_path: string | null }[]
+  credits: {
+    cast: TMDBCastMember[]
+  }
+  videos: {
+    results: TMDBVideo[]
+  }
 }
 
 export interface TMDBSearchResult {
@@ -74,14 +102,14 @@ export async function searchMovies(query: string, page = 1): Promise<TMDBSearchR
   return apiFetch('/search/movie', { query, page: String(page) })
 }
 
-export async function getMovieDetails(id: number): Promise<TMDBMovieDetail> {
-  return apiFetch(`/movie/${id}`)
+export async function getMovieDetails(id: number): Promise<TMDBMovieDetails> {
+  return apiFetch(`/movie/${id}`, { append_to_response: 'credits,videos' })
 }
 
 export async function getTrendingMovies(): Promise<TMDBSearchResult> {
   return apiFetch('/trending/movie/week')
 }
 
-export async function getMoviesByIds(ids: number[]): Promise<TMDBMovieDetail[]> {
+export async function getMoviesByIds(ids: number[]): Promise<TMDBMovieDetails[]> {
   return Promise.all(ids.map((id) => getMovieDetails(id)))
 }

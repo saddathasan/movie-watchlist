@@ -104,7 +104,7 @@ function LoginPage() {
                 <button
                   key={m}
                   onClick={() => { setMode(m); setAuthError(null); form.reset() }}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-200 capitalize ${
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-200 capitalize cursor-pointer ${
                     mode === m
                       ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
@@ -164,7 +164,7 @@ function LoginPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                         tabIndex={-1}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -208,7 +208,7 @@ function LoginPage() {
               {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
               <button
                 onClick={toggleMode}
-                className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+                className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors cursor-pointer"
               >
                 {mode === 'login' ? 'Sign up' : 'Sign in'}
               </button>

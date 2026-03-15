@@ -1,9 +1,22 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BookMarked, Trash2, LogIn, Star, Calendar, Search } from 'lucide-react'
+import { BookMarked, LogIn, Search, Trash2, Star, Film } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent } from '#/components/ui/card'
-import { Skeleton } from '#/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '#/components/ui/tooltip'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '#/components/ui/dialog'
 import { useAuth } from '#/integrations/auth/provider'
 import { useWatchlist, type WatchlistEntry } from '#/hooks/useWatchlist'
 import { posterUrl } from '#/lib/tmdb'
@@ -34,7 +47,7 @@ function WatchlistPage() {
           <p className="text-muted-foreground text-sm mb-6">
             Your watchlist is saved per account. Sign in to access your saved movies from any device.
           </p>
-          <Link to="/login">
+          <Link to="/login" className="cursor-pointer">
             <Button className="gap-2">
               <LogIn className="w-4 h-4" />
               Sign in
@@ -50,13 +63,19 @@ function WatchlistPage() {
 
 function AuthenticatedWatchlist() {
   const { watchlist, loading, removeFromWatchlist } = useWatchlist()
-
-  const handleRemove = async (entry: WatchlistEntry) => {
-    await removeFromWatchlist(entry.id)
-    toast.success(`Removed "${entry.title}" from watchlist`)
-  }
-
+  const [pendingDelete, setPendingDelete] = useState<WatchlistEntry | null>(null)
   if (loading) return <WatchlistSkeleton />
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return
+    const entry = pendingDelete
+    setPendingDelete(null)
+    toast.promise(removeFromWatchlist(entry.id), {
+      loading: `Removing "${entry.title}"…`,
+      success: `"${entry.title}" removed from watchlist`,
+      error: `Failed to remove "${entry.title}"`,
+    })
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -74,43 +93,44 @@ function AuthenticatedWatchlist() {
               : `${watchlist.length} movie${watchlist.length !== 1 ? 's' : ''} saved`}
           </p>
         </div>
-        <Link to="/search">
-          <Button variant="outline" className="gap-2">
-            <Search className="w-4 h-4" />
-            Find more movies
-          </Button>
-        </Link>
+        {watchlist.length > 0 && (
+          <Link to="/search" className="cursor-pointer">
+            <Button variant="outline" className="gap-2">
+              <Search className="w-4 h-4" />
+              Find more movies
+            </Button>
+          </Link>
+        )}
       </motion.div>
 
       {/* Empty state */}
-      {watchlist.length === 0 && (
+      {watchlist.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="text-center py-20"
+          className="py-32 flex flex-col items-center text-center max-w-lg mx-auto bg-card/50 rounded-3xl border border-white/5 shadow-2xl backdrop-blur-sm"
         >
-          <div className="flex items-center justify-center w-20 h-20 rounded-3xl bg-muted mx-auto mb-5">
-            <BookMarked className="w-10 h-10 text-muted-foreground" />
+          <div className="flex items-center justify-center w-24 h-24 rounded-3xl bg-muted mb-8">
+            <BookMarked className="w-12 h-12 text-muted-foreground" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">Your watchlist is empty</h2>
-          <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-6">
-            Start adding movies by clicking the bookmark icon on any movie card or details page.
+          <h2 className="font-display text-3xl text-foreground mb-4">Your watchlist is empty</h2>
+          <p className="text-muted-foreground text-lg mb-8 px-8">
+            You haven't added any movies yet. Start exploring and build your cinematic library.
           </p>
-          <Link to="/search">
-            <Button className="gap-2">
+          <Link to="/search" className="cursor-pointer">
+            <Button size="lg" className="px-8 font-bold text-base gap-2">
               <Search className="w-4 h-4" />
-              Search for movies
+              Explore Movies
             </Button>
           </Link>
         </motion.div>
-      )}
-
-      {/* Grid */}
-      {watchlist.length > 0 && (
+      ) : (
+        /* Grid */
         <motion.div
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
         >
           <AnimatePresence mode="popLayout">
             {watchlist.map((entry, i) => (
@@ -118,12 +138,44 @@ function AuthenticatedWatchlist() {
                 key={entry.id}
                 entry={entry}
                 index={i}
-                onRemove={() => handleRemove(entry)}
+                onDelete={() => setPendingDelete(entry)}
               />
             ))}
           </AnimatePresence>
         </motion.div>
       )}
+
+      {/* Delete confirmation modal */}
+      <Dialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remove from Watchlist</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove{' '}
+              <span className="font-semibold text-foreground">
+                "{pendingDelete?.title}"
+              </span>{' '}
+              from your watchlist? This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row justify-end gap-3 pt-2">
+            <Button
+              variant="ghost"
+              onClick={() => setPendingDelete(null)}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              className="cursor-pointer"
+            >
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -131,76 +183,90 @@ function AuthenticatedWatchlist() {
 function WatchlistCard({
   entry,
   index,
-  onRemove,
+  onDelete,
 }: {
   entry: WatchlistEntry
   index: number
-  onRemove: () => void
+  onDelete: () => void
 }) {
   const poster = posterUrl(entry.poster_path, 'w342')
-  const year = entry.release_date ? entry.release_date.slice(0, 4) : '—'
-  const rating = entry.vote_average ? entry.vote_average.toFixed(1) : 'N/A'
+  const year = entry.release_date?.slice(0, 4) || 'N/A'
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-      transition={{ duration: 0.3, delay: index * 0.04 }}
+      exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
+      transition={{ duration: 0.35, delay: index * 0.04 }}
+      className="group relative rounded-xl bg-surface shadow-card hover:-translate-y-1 transition-transform duration-300"
     >
-      <Card className="group overflow-hidden border-border/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-row gap-0 p-0 h-36">
-        {/* Poster */}
-        <Link
-          to="/movie/$id"
-          params={{ id: String(entry.id) }}
-          className="block flex-shrink-0 w-24 overflow-hidden"
-        >
-          <img
-            src={poster ?? '/placeholder-poster.svg'}
-            alt={entry.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-        </Link>
-
-        {/* Info */}
-        <CardContent className="p-3 flex flex-col justify-between flex-1 min-w-0">
-          <div>
-            <Link to="/movie/$id" params={{ id: String(entry.id) }}>
-              <h3 className="font-semibold text-sm leading-tight line-clamp-2 hover:text-primary transition-colors">
-                {entry.title}
-              </h3>
-            </Link>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {year}
-              </span>
-              <span className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                {rating}
-              </span>
+      {/* Poster — clickable */}
+      <Link
+        to="/movie/$id"
+        params={{ id: String(entry.id) }}
+        className="block overflow-hidden rounded-t-xl cursor-pointer"
+      >
+        <div className="relative aspect-[2/3] overflow-hidden">
+          {poster ? (
+            <img
+              src={poster}
+              alt={entry.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-secondary">
+              <Film className="h-12 w-12 text-muted-foreground" />
             </div>
-          </div>
-          <div className="flex gap-2 mt-2">
-            <Link to="/movie/$id" params={{ id: String(entry.id) }} className="flex-1">
-              <Button variant="secondary" size="sm" className="w-full text-xs h-7">
-                Details
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              onClick={onRemove}
-              aria-label="Remove from watchlist"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+          {/* Hover gradient scoped to poster */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+      </Link>
+
+      {/* Rating badge */}
+      {(entry.vote_average ?? 0) > 0 && (
+        <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-xs font-semibold backdrop-blur-sm">
+          <Star className="h-3 w-3 fill-primary text-primary" />
+          {entry.vote_average.toFixed(1)}
+        </div>
+      )}
+
+      {/* Info row */}
+      <div className="flex items-center gap-1 p-3">
+        <div className="flex-1 min-w-0">
+          {/* Title — clickable, turns gold on card hover */}
+          <Link
+            to="/movie/$id"
+            params={{ id: String(entry.id) }}
+            className="cursor-pointer"
+          >
+            <h3 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors duration-200">
+              {entry.title}
+            </h3>
+          </Link>
+          <p className="text-xs text-muted-foreground mt-0.5">{year}</p>
+        </div>
+
+        {/* Delete button — gold circle on hover, with tooltip */}
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={onDelete}
+                aria-label={`Remove ${entry.title} from watchlist`}
+                className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-200 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Remove from watchlist</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </motion.div>
   )
 }
@@ -209,12 +275,12 @@ function WatchlistSkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <Skeleton className="h-9 w-48 mb-2" />
-        <Skeleton className="h-4 w-32" />
+        <div className="h-9 w-48 bg-secondary/50 animate-pulse rounded mb-2" />
+        <div className="h-4 w-32 bg-secondary/50 animate-pulse rounded" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-36 rounded-xl" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="aspect-[2/3] rounded-2xl bg-secondary/50 animate-pulse" />
         ))}
       </div>
     </div>

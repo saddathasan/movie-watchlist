@@ -5,6 +5,12 @@ import { posterUrl, type TMDBMovie } from '#/lib/tmdb'
 import { useAuth } from '#/integrations/auth/provider'
 import { useWatchlist } from '#/hooks/useWatchlist'
 import { toast } from 'sonner'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '#/components/ui/tooltip'
 
 interface MovieCardProps {
   movie: TMDBMovie
@@ -41,10 +47,10 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
     >
-      <Link to="/movie/$id" params={{ id: String(movie.id) }} className="group block">
-        <div className="relative overflow-hidden rounded-lg bg-surface shadow-card transition-all duration-300 group-hover:shadow-glow group-hover:-translate-y-1">
+      <Link to="/movie/$id" params={{ id: String(movie.id) }} className="group block cursor-pointer">
+        <div className="relative overflow-hidden rounded-lg bg-surface shadow-card transition-transform duration-300 group-hover:-translate-y-1">
           {/* Poster */}
-          <div className="aspect-[2/3] overflow-hidden">
+          <div className="aspect-2/3 overflow-hidden">
             {poster ? (
               <img
                 src={poster}
@@ -58,7 +64,7 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
               </div>
             )}
             {/* Hover gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
 
           {/* Rating badge */}
@@ -69,22 +75,31 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
             </div>
           )}
 
-          {/* Watchlist button */}
-          <button
-            onClick={handleWatchlist}
-            className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 ${
-              inList
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground'
-            }`}
-            aria-label={inList ? 'Remove from watchlist' : 'Add to watchlist'}
-          >
-            {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          </button>
+          {/* Watchlist button with tooltip */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleWatchlist}
+                  className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 cursor-pointer ${
+                    inList
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground'
+                  }`}
+                  aria-label={inList ? 'Remove from watchlist' : 'Add to watchlist'}
+                >
+                  {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{inList ? 'Remove from watchlist' : 'Add to watchlist'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* Info */}
           <div className="p-3">
-            <h3 className="font-semibold text-sm text-foreground truncate">{movie.title}</h3>
+            <h3 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors duration-200">{movie.title}</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{year}</p>
           </div>
         </div>
@@ -96,7 +111,7 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
 export function MovieCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-lg bg-surface shadow-card">
-      <div className="aspect-[2/3] bg-secondary animate-pulse" />
+      <div className="aspect-2/3 bg-secondary animate-pulse" />
       <div className="p-3 flex flex-col gap-2">
         <div className="h-4 bg-secondary animate-pulse rounded w-3/4" />
         <div className="h-3 bg-secondary animate-pulse rounded w-1/3" />

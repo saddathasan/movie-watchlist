@@ -34,7 +34,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             to="/search"
-            className="flex items-center gap-2 group"
+          className="flex items-center gap-2 group cursor-pointer"
           >
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary text-primary-foreground group-hover:scale-105 transition-transform">
               <Film className="w-5 h-5" />
@@ -50,7 +50,7 @@ export default function Navbar() {
               <Link
                 key={to}
                 to={to}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 [&.active]:text-foreground [&.active]:bg-accent"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 [&.active]:text-foreground [&.active]:bg-accent cursor-pointer"
               >
                 <Icon className="w-4 h-4" />
                 {label}
@@ -89,7 +89,7 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
@@ -114,7 +114,7 @@ export default function Navbar() {
                   key={to}
                   to={to}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all [&.active]:text-foreground [&.active]:bg-accent"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all [&.active]:text-foreground [&.active]:bg-accent cursor-pointer"
                 >
                   <Icon className="w-4 h-4" />
                   {label}
@@ -127,7 +127,7 @@ export default function Navbar() {
                       <p className="text-xs text-muted-foreground px-3 py-1 truncate">{user.email}</p>
                       <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                        className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         Sign out
@@ -137,7 +137,7 @@ export default function Navbar() {
                     <Link
                       to="/login"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground bg-primary/10 hover:bg-primary/20 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground bg-primary/10 hover:bg-primary/20 transition-all cursor-pointer"
                     >
                       <LogIn className="w-4 h-4" />
                       Sign in
