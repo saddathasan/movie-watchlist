@@ -50,7 +50,7 @@ export function TrendingStrip() {
                 params={{ id: String(movie.id) }}
                 to="/movie/$id"
               >
-                <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface shadow-card transition-all duration-500 group-hover:shadow-glow group-hover:-translate-y-2">
+                <div className="relative aspect-2/3 overflow-hidden rounded-lg bg-surface shadow-card transition-all duration-500 group-hover:shadow-glow group-hover:-translate-y-2">
                   {movie.poster_path ? (
                     <img
                       alt={movie.title}
@@ -63,7 +63,7 @@ export function TrendingStrip() {
                       <Play className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-linear-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                     <p className="text-xs font-semibold text-foreground truncate">
                       {movie.title}

@@ -53,13 +53,17 @@ pnpx shadcn@latest add [component]  # Add shadcn/ui component
 
 ```
 src/
-├── components/ui/        # Shadcn/ui primitives (DO NOT edit manually — use pnpx shadcn)
+├── components/           # Shared components used across 2+ features
+│   ├── ui/               # Shadcn/ui primitives (DO NOT edit manually — use pnpx shadcn)
+│   ├── index.ts          # Barrel — import shared components from #/components
+│   ├── movie-card.tsx    # Shared card (movies + watchlist); action slot for feature button
+│   └── remove-from-watchlist-dialog.tsx
 ├── features/             # Feature modules (see Component Architecture below)
 │   ├── auth/             # Auth sheet, login/signup form
 │   ├── home/             # Hero section, trending strip
 │   ├── layout/           # Navbar (global shell component)
-│   ├── movies/           # MovieCard, MovieDetail, SearchContent
-│   └── watchlist/        # WatchlistPageContent + hooks/use-watchlist
+│   ├── movies/           # MovieDetail, SearchContent, WatchlistToggleButton
+│   └── watchlist/        # WatchlistPageContent + DeleteButton + hooks/use-watchlist
 ├── hooks/                # Cross-feature shared hooks (reserved; currently empty)
 ├── integrations/
 │   ├── auth/             # Firebase auth context + useAuth hook
@@ -84,9 +88,9 @@ src/
 
 These rules apply to all features. They are enforceable and non-negotiable.
 
-### 9 Rules
+### Rules
 
-1. **Atomic** — each component has a single responsibility. No god components.
+1. **Atomic / SRP** — each component has a single responsibility. No god components.
 
 2. **Independent** — no hidden external dependencies. All deps are explicit (props, hooks, imports).
 
@@ -95,7 +99,7 @@ These rules apply to all features. They are enforceable and non-negotiable.
 
 4. **Feature-grouped** — all components, hooks, and utils for a feature live in `src/features/[name]/`.
 
-5. **Common components** — globally reusable across 2+ routes go in `src/components/`. Criterion: if it's reused in 2+ routes, it's common. If it's feature-specific, it stays in the feature.
+5. **Common components** — globally reusable across 2+ features/routes go in `src/components/`. Criterion: used in 2+ places → common. Feature-specific → stays in feature.
 
 6. **Build on shadcn/ui** — custom components extend shadcn primitives. Never reinvent what shadcn provides.
 
@@ -105,7 +109,13 @@ These rules apply to all features. They are enforceable and non-negotiable.
 
 9. **All feature logic in `src/features/`** — hooks, utils, types, sub-components. If it's logic, it does not belong in a route file.
 
-10. **Small files** — ~50 lines is the signal to split. Internal sub-components always go in their own files, never co-located in a parent's file. One component per file.
+10. **Small files** — ~100 lines is the signal to split. Internal sub-components always go in their own files, never co-located in a parent's file. One component per file.
+
+11. **DRY** — shared UI used in 2+ places moves to `src/components/`. Shared logic moves to `src/hooks/`. Never duplicate.
+
+12. **Orchestrator pattern** — parent owns all state + handlers, passes callbacks down to presentational children. Presentational components receive only what they need via props; no internal auth/query/state knowledge.
+
+13. **Controlled components** — dialog/modal open state (`open`, `onCancel`, `onConfirm`) owned by the caller (orchestrator), never by the dialog itself.
 
 ### Feature Internal Structure
 

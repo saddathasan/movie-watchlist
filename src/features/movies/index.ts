@@ -1,3 +1,5 @@
-export { MovieCard, MovieCardSkeleton } from './movie-card'
-export { MovieDetail, MovieDetailSkeleton } from './movie-detail'
-export { SearchContent, searchSchema } from './search-content'
+export { MovieCardSkeleton } from './movie-card-skeleton'
+export { MovieDetail } from './movie-detail'
+export { MovieDetailSkeleton } from './movie-detail-skeleton'
+export { SearchContent } from './search-content'
+export { searchSchema } from './search-schema'
