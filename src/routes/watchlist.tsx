@@ -43,11 +43,14 @@ function WatchlistPage() {
           <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-muted mx-auto mb-4">
             <BookMarked className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">Sign in to see your Watchlist</h2>
+          <h2 className="text-xl font-semibold mb-2">
+            Sign in to see your Watchlist
+          </h2>
           <p className="text-muted-foreground text-sm mb-6">
-            Your watchlist is saved per account. Sign in to access your saved movies from any device.
+            Your watchlist is saved per account. Sign in to access your saved
+            movies from any device.
           </p>
-          <Link to="/login" className="cursor-pointer">
+          <Link to="/" className="cursor-pointer">
             <Button className="gap-2">
               <LogIn className="w-4 h-4" />
               Sign in
@@ -63,7 +66,9 @@ function WatchlistPage() {
 
 function AuthenticatedWatchlist() {
   const { watchlist, loading, removeFromWatchlist } = useWatchlist()
-  const [pendingDelete, setPendingDelete] = useState<WatchlistEntry | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<WatchlistEntry | null>(
+    null,
+  )
   if (loading) return <WatchlistSkeleton />
 
   const handleConfirmDelete = () => {
@@ -114,9 +119,12 @@ function AuthenticatedWatchlist() {
           <div className="flex items-center justify-center w-24 h-24 rounded-3xl bg-muted mb-8">
             <BookMarked className="w-12 h-12 text-muted-foreground" />
           </div>
-          <h2 className="font-display text-3xl text-foreground mb-4">Your watchlist is empty</h2>
+          <h2 className="font-display text-3xl text-foreground mb-4">
+            Your watchlist is empty
+          </h2>
           <p className="text-muted-foreground text-lg mb-8 px-8">
-            You haven't added any movies yet. Start exploring and build your cinematic library.
+            You haven't added any movies yet. Start exploring and build your
+            cinematic library.
           </p>
           <Link to="/search" className="cursor-pointer">
             <Button size="lg" className="px-8 font-bold text-base gap-2">
@@ -146,7 +154,12 @@ function AuthenticatedWatchlist() {
       )}
 
       {/* Delete confirmation modal */}
-      <Dialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null) }}>
+      <Dialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null)
+        }}
+      >
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Remove from Watchlist</DialogTitle>
@@ -280,7 +293,10 @@ function WatchlistSkeleton() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="aspect-[2/3] rounded-2xl bg-secondary/50 animate-pulse" />
+          <div
+            key={i}
+            className="aspect-[2/3] rounded-2xl bg-secondary/50 animate-pulse"
+          />
         ))}
       </div>
     </div>

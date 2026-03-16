@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as SearchRouteImport } from './routes/search'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
 
@@ -23,11 +22,6 @@ const WatchlistRoute = WatchlistRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +37,12 @@ const MovieIdRoute = MovieIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
@@ -58,22 +50,20 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/search' | '/watchlist' | '/movie/$id'
+  fullPaths: '/' | '/search' | '/watchlist' | '/movie/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/search' | '/watchlist' | '/movie/$id'
-  id: '__root__' | '/' | '/login' | '/search' | '/watchlist' | '/movie/$id'
+  to: '/' | '/search' | '/watchlist' | '/movie/$id'
+  id: '__root__' | '/' | '/search' | '/watchlist' | '/movie/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LoginRoute: typeof LoginRoute
   SearchRoute: typeof SearchRoute
   WatchlistRoute: typeof WatchlistRoute
   MovieIdRoute: typeof MovieIdRoute
@@ -95,13 +85,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -121,7 +104,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LoginRoute: LoginRoute,
   SearchRoute: SearchRoute,
   WatchlistRoute: WatchlistRoute,
   MovieIdRoute: MovieIdRoute,

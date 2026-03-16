@@ -1,11 +1,21 @@
 import { Link } from '@tanstack/react-router'
-import { Film, Search, BookMarked, LogIn, LogOut, Menu, X, User } from 'lucide-react'
+import {
+  Film,
+  Search,
+  BookMarked,
+  LogIn,
+  LogOut,
+  Menu,
+  X,
+  User,
+} from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '#/integrations/auth/provider'
 import { useWatchlist } from '#/hooks/useWatchlist'
 import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
+import { AuthSheet } from '#/components/AuthSheet'
 
 const baseNavLink =
   'flex items-center gap-2 px-2 py-1 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground cursor-pointer'
@@ -16,6 +26,7 @@ export default function Navbar() {
   const { watchlist } = useWatchlist()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [authSheetOpen, setAuthSheetOpen] = useState(false)
 
   const handleSignOut = async () => {
     try {
@@ -40,7 +51,10 @@ export default function Navbar() {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to={logoTo} className="flex items-center gap-2 group cursor-pointer">
+        <Link
+          to={logoTo}
+          className="flex items-center gap-2 group cursor-pointer"
+        >
           <Film className="h-6 w-6 text-primary transition-transform duration-300 group-hover:rotate-12" />
           <span className="font-display text-2xl tracking-wider text-foreground">
             CINE<span className="text-primary">WATCH</span>
@@ -56,7 +70,7 @@ export default function Navbar() {
             activeOptions={{ exact: true }}
           >
             <Search className="h-4 w-4" />
-            <span>Search</span>
+            <span>Explore Movies</span>
           </Link>
 
           {user && (
@@ -79,8 +93,8 @@ export default function Navbar() {
           {/* Divider */}
           <span className="w-px h-4 bg-border/60 shrink-0" />
 
-          {!loading && (
-            user ? (
+          {!loading &&
+            (user ? (
               <div className="flex items-center gap-3">
                 <span className="hidden lg:flex items-center gap-1.5 text-sm text-muted-foreground truncate max-w-[180px]">
                   <User className="h-3.5 w-3.5 shrink-0" />
@@ -95,17 +109,14 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/login"
+              <button
+                onClick={() => setAuthSheetOpen(true)}
                 className={baseNavLink}
-                activeProps={{ className: activeNavLink }}
-                activeOptions={{ exact: true }}
               >
                 <LogIn className="h-4 w-4" />
                 <span>Login</span>
-              </Link>
-            )
-          )}
+              </button>
+            ))}
         </div>
 
         {/* Mobile toggle */}
@@ -114,7 +125,11 @@ export default function Navbar() {
           onClick={() => setMobileOpen((v) => !v)}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {mobileOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
         </button>
       </div>
 
@@ -159,8 +174,8 @@ export default function Navbar() {
               )}
 
               <div className="pt-2 border-t border-border/40 mt-1">
-                {!loading && (
-                  user ? (
+                {!loading &&
+                  (user ? (
                     <>
                       <p className="flex items-center gap-1.5 text-xs text-muted-foreground px-2 py-1 truncate">
                         <User className="h-3 w-3 shrink-0" />
@@ -175,23 +190,24 @@ export default function Navbar() {
                       </button>
                     </>
                   ) : (
-                    <Link
-                      to="/login"
-                      onClick={() => setMobileOpen(false)}
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false)
+                        setAuthSheetOpen(true)
+                      }}
                       className={baseNavLink}
-                      activeProps={{ className: activeNavLink }}
-                      activeOptions={{ exact: true }}
                     >
                       <LogIn className="h-4 w-4" />
                       Login
-                    </Link>
-                  )
-                )}
+                    </button>
+                  ))}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthSheet open={authSheetOpen} onOpenChange={setAuthSheetOpen} />
     </motion.nav>
   )
 }
