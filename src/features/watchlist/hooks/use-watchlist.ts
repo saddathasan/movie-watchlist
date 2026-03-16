@@ -1,13 +1,15 @@
-import {
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  collection,
-} from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { db } from '../integrations/firebase/config'
-import { useAuth } from '../integrations/auth/provider'
+
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+} from 'firebase/firestore'
+
+import { useAuth } from '#/integrations/auth/provider'
+import { db } from '#/integrations/firebase/config'
 
 function watchlistRef(userId: string) {
   return collection(db, 'users', userId, 'watchlist')
@@ -44,7 +46,6 @@ export function useWatchlist() {
       snapshot.forEach((docSnap) => {
         entries.push(docSnap.data() as WatchlistEntry)
       })
-      // Sort by most recently added
       entries.sort((a, b) => b.addedAt - a.addedAt)
       setWatchlist(entries)
       setLoading(false)

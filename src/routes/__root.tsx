@@ -5,7 +5,7 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 
-import Navbar from '#/components/Navbar'
+import { Navbar } from '#/features/layout'
 
 import { AuthProvider } from '#/integrations/auth/provider'
 import TanStackQueryProvider from '#/integrations/tanstack-query/root-provider'

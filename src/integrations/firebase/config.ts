@@ -14,7 +14,8 @@ const firebaseConfig = {
 }
 
 // Prevent duplicate app initialization (SSR/HMR safe)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)

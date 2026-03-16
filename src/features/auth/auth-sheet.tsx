@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
+
 import { useForm } from '@tanstack/react-form'
-import { z } from 'zod'
+import { useRouter } from '@tanstack/react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Film,
@@ -12,10 +13,11 @@ import {
   ArrowRight,
   ShieldCheck,
 } from 'lucide-react'
-import { useRouter } from '@tanstack/react-router'
-import { useAuth } from '#/integrations/auth/provider'
 import { toast } from 'sonner'
+import { z } from 'zod'
+
 import { Sheet, SheetContent } from '#/components/ui/sheet'
+import { useAuth } from '#/integrations/auth/provider'
 
 type AuthMode = 'login' | 'signup'
 
@@ -97,11 +99,11 @@ function PasswordStrengthMeter({ password }: { password: string }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.2 }}
       className="space-y-1.5 pt-1"
+      exit={{ opacity: 0, height: 0 }}
+      initial={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.2 }}
     >
       <div className="flex items-center gap-1.5">
         {([1, 2, 3, 4] as const).map((seg) => (
@@ -109,21 +111,14 @@ function PasswordStrengthMeter({ password }: { password: string }) {
             key={seg}
             className="flex-1 h-1 rounded-full overflow-hidden bg-border/40"
           >
-            <motion.div
-              className={`h-full rounded-full ${score >= seg ? barColor : 'bg-transparent'}`}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: score >= seg ? 1 : 0 }}
-              transition={{
-                duration: 0.25,
-                ease: 'easeOut',
-                delay: seg * 0.04,
-              }}
-              style={{ transformOrigin: 'left' }}
+            <div
+              className={`h-full rounded-full transition-all duration-300 ease-out ${score >= seg ? barColor : 'bg-transparent'}`}
+              style={{ width: score >= seg ? '100%' : '0%' }}
             />
           </div>
         ))}
         <span
-          className={`text-[11px] font-medium font-form w-12 text-right shrink-0 ${labelColor}`}
+          className={`text-[11px] font-medium font-form w-12 text-right shrink-0 transition-colors duration-300 ${labelColor}`}
         >
           {label}
         </span>
@@ -186,7 +181,7 @@ export function AuthSheet({
         onOpenChange(false)
         router.navigate({ to: '/watchlist' })
       } catch (err: unknown) {
-        const msg = (err as { code?: string })?.code
+        const msg = (err as { code?: string }).code
         if (
           msg === 'auth/user-not-found' ||
           msg === 'auth/wrong-password' ||
@@ -227,9 +222,9 @@ export function AuthSheet({
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
-        side="right"
-        showCloseButton={true}
         className="w-full sm:w-[50vw] lg:w-[33vw] max-w-none! bg-overlay/80 backdrop-blur-xl border-border/50 p-0 flex flex-col overflow-y-auto"
+        showCloseButton={true}
+        side="right"
       >
         {/* Vertically centered main content */}
         <div className="flex-1 flex flex-col justify-center px-6 sm:px-8 py-10">
@@ -247,11 +242,11 @@ export function AuthSheet({
             <AnimatePresence mode="wait">
               <motion.div
                 key={mode}
-                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
                 className="mb-8"
+                exit={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
                 <h2 className="font-display text-4xl leading-none text-foreground">
                   {mode === 'login' ? (
@@ -274,11 +269,11 @@ export function AuthSheet({
 
             {/* Form */}
             <form
+              className="space-y-3"
               onSubmit={(e) => {
                 e.preventDefault()
                 form.handleSubmit()
               }}
-              className="space-y-3"
             >
               {/* Email */}
               <form.Field name="email">
@@ -286,15 +281,15 @@ export function AuthSheet({
                   <div className="relative group">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary pointer-events-none" />
                     <input
+                      autoComplete="email"
+                      className={inputClass}
                       id="email"
-                      type="email"
                       placeholder="Email address"
                       required
-                      autoComplete="email"
+                      type="email"
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
-                      className={inputClass}
+                      onChange={(e) => field.handleChange(e.target.value)}
                     />
                   </div>
                 )}
@@ -307,27 +302,27 @@ export function AuthSheet({
                     <div className="relative group">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary pointer-events-none" />
                       <input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Password"
-                        required
-                        minLength={6}
                         autoComplete={
                           mode === 'login' ? 'current-password' : 'new-password'
                         }
+                        className={inputClass}
+                        id="password"
+                        minLength={6}
+                        placeholder="Password"
+                        required
+                        type={showPassword ? 'text' : 'password'}
                         value={field.state.value}
+                        onBlur={field.handleBlur}
                         onChange={(e) => {
                           field.handleChange(e.target.value)
                           setPasswordValue(e.target.value)
                         }}
-                        onBlur={field.handleBlur}
-                        className={inputClass}
                       />
                       <button
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        tabIndex={-1}
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
-                        tabIndex={-1}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -339,9 +334,12 @@ export function AuthSheet({
 
                     {/* Strength meter — signup only */}
                     <AnimatePresence>
-                      {mode === 'signup' && (
-                        <PasswordStrengthMeter password={passwordValue} />
-                      )}
+                      {mode === 'signup' ? (
+                        <PasswordStrengthMeter
+                          key="strength-meter"
+                          password={passwordValue}
+                        />
+                      ) : null}
                     </AnimatePresence>
                   </div>
                 )}
@@ -349,11 +347,11 @@ export function AuthSheet({
 
               {/* Confirm password — signup only */}
               <AnimatePresence>
-                {mode === 'signup' && (
+                {mode === 'signup' ? (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.25, ease: 'easeOut' }}
                   >
                     <form.Field name="confirmPassword">
@@ -361,21 +359,21 @@ export function AuthSheet({
                         <div className="relative group">
                           <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary pointer-events-none" />
                           <input
+                            autoComplete="new-password"
+                            className={inputClass}
                             id="confirmPassword"
-                            type={showConfirm ? 'text' : 'password'}
                             placeholder="Confirm password"
                             required
-                            autoComplete="new-password"
+                            type={showConfirm ? 'text' : 'password'}
                             value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
-                            className={inputClass}
+                            onChange={(e) => field.handleChange(e.target.value)}
                           />
                           <button
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                            tabIndex={-1}
                             type="button"
                             onClick={() => setShowConfirm((v) => !v)}
-                            tabIndex={-1}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                           >
                             {showConfirm ? (
                               <EyeOff className="h-4 w-4" />
@@ -387,32 +385,32 @@ export function AuthSheet({
                       )}
                     </form.Field>
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
 
               {/* Error banner */}
               <AnimatePresence>
-                {authError && (
+                {authError ? (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
                     className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 rounded-xl px-4 py-3"
+                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
                   >
                     <AlertCircle className="h-4 w-4 flex-shrink-0" />
                     <span className="font-form">{authError}</span>
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
 
               {/* Submit */}
               <form.Subscribe selector={(s) => s.isSubmitting}>
                 {(isSubmitting) => (
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
                     className="font-form w-full flex items-center justify-center gap-2 rounded-xl gradient-gold py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:shadow-glow disabled:opacity-50 mt-6 cursor-pointer"
+                    disabled={isSubmitting}
+                    type="submit"
                   >
                     {isSubmitting
                       ? 'Please wait…'
@@ -431,8 +429,8 @@ export function AuthSheet({
                 ? "Don't have an account?"
                 : 'Already have an account?'}{' '}
               <button
-                onClick={toggleMode}
                 className="text-primary hover:underline font-medium cursor-pointer"
+                onClick={toggleMode}
               >
                 {mode === 'login' ? 'Sign up' : 'Sign in'}
               </button>
@@ -444,10 +442,10 @@ export function AuthSheet({
         <p className="px-10 pb-6 text-center text-xs text-muted-foreground/50 font-form">
           Movie data by{' '}
           <a
-            href="https://www.themoviedb.org"
-            target="_blank"
-            rel="noopener noreferrer"
             className="underline underline-offset-4 hover:text-muted-foreground transition-colors"
+            href="https://www.themoviedb.org"
+            rel="noopener noreferrer"
+            target="_blank"
           >
             TMDB
           </a>

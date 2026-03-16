@@ -1,16 +1,19 @@
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Plus, Check, Star, Film } from 'lucide-react'
-import { posterUrl, type TMDBMovie } from '#/lib/tmdb'
-import { useAuth } from '#/integrations/auth/provider'
-import { useWatchlist } from '#/hooks/useWatchlist'
 import { toast } from 'sonner'
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '#/components/ui/tooltip'
+import { useAuth } from '#/integrations/auth/provider'
+import { posterUrl } from '#/lib/tmdb'
+import type { TMDBMovie } from '#/lib/tmdb'
+
+import { useWatchlist } from '../watchlist/hooks/use-watchlist'
 
 interface MovieCardProps {
   movie: TMDBMovie
@@ -22,7 +25,7 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
   const { isInWatchlist, toggleWatchlist } = useWatchlist()
   const inList = isInWatchlist(movie.id)
   const poster = posterUrl(movie.poster_path, 'w342')
-  const year = movie.release_date?.split('-')[0] || 'N/A'
+  const year = movie.release_date.split('-')[0] || 'N/A'
 
   const handleWatchlist = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -43,20 +46,24 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 20 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
     >
-      <Link to="/movie/$id" params={{ id: String(movie.id) }} className="group block cursor-pointer">
+      <Link
+        className="group block cursor-pointer"
+        params={{ id: String(movie.id) }}
+        to="/movie/$id"
+      >
         <div className="relative overflow-hidden rounded-lg bg-surface shadow-card transition-transform duration-300 group-hover:-translate-y-1">
           {/* Poster */}
           <div className="aspect-2/3 overflow-hidden">
             {poster ? (
               <img
-                src={poster}
                 alt={movie.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
+                src={poster}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-secondary">
@@ -68,27 +75,33 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
           </div>
 
           {/* Rating badge */}
-          {movie.vote_average > 0 && (
+          {movie.vote_average > 0 ? (
             <div className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-xs font-semibold backdrop-blur-sm">
               <Star className="h-3 w-3 fill-primary text-primary" />
               {movie.vote_average.toFixed(1)}
             </div>
-          )}
+          ) : null}
 
           {/* Watchlist button with tooltip */}
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={handleWatchlist}
+                  aria-label={
+                    inList ? 'Remove from watchlist' : 'Add to watchlist'
+                  }
                   className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 cursor-pointer ${
                     inList
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground'
                   }`}
-                  aria-label={inList ? 'Remove from watchlist' : 'Add to watchlist'}
+                  onClick={handleWatchlist}
                 >
-                  {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  {inList ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
                 </button>
               </TooltipTrigger>
               <TooltipContent>
@@ -99,7 +112,9 @@ export function MovieCard({ movie, index = 0 }: MovieCardProps) {
 
           {/* Info */}
           <div className="p-3">
-            <h3 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors duration-200">{movie.title}</h3>
+            <h3 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors duration-200">
+              {movie.title}
+            </h3>
             <p className="text-xs text-muted-foreground mt-0.5">{year}</p>
           </div>
         </div>

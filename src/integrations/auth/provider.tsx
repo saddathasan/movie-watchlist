@@ -1,19 +1,14 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
-  type User,
 } from 'firebase/auth'
+import type { User } from 'firebase/auth'
 import { auth } from '../firebase/config'
 
 interface AuthContextValue {
