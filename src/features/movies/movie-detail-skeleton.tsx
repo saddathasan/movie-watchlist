@@ -4,7 +4,7 @@ export function MovieDetailSkeleton() {
   return (
     <div className="min-h-screen">
       <div className="h-[50vh] md:h-[60vh] bg-surface animate-pulse" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-48 relative z-10">
+      <div className="page-container -mt-48 relative z-10">
         <div className="mb-6 h-5 w-16 bg-surface animate-pulse rounded" />
         <div className="flex flex-col md:flex-row gap-8">
           <Skeleton className="w-48 md:w-64 aspect-2/3 rounded-lg shrink-0 mx-auto md:mx-0" />

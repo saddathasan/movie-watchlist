@@ -1,6 +1,6 @@
 export function WatchlistSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="page-container py-8">
       <div className="mb-8">
         <div className="h-9 w-48 bg-secondary/50 animate-pulse rounded mb-2" />
         <div className="h-4 w-32 bg-secondary/50 animate-pulse rounded" />

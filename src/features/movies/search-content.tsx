@@ -65,7 +65,7 @@ export function SearchContent({
     isSearching && totalPages > 1 && !activeQuery.isLoading && movies.length > 0
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="page-container py-8">
       {/* Hero search bar */}
       <motion.div
         animate={{ opacity: 1, y: 0 }}

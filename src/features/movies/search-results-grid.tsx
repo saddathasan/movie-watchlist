@@ -23,6 +23,9 @@ export function SearchResultsGrid({
   isSearching,
   onRetry,
 }: SearchResultsGridProps) {
+  const gridClass =
+    'grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+
   if (isError) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
@@ -40,7 +43,7 @@ export function SearchResultsGrid({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className={gridClass}>
         {Array.from({ length: 12 }).map((_, i) => (
           <MovieCardSkeleton key={i} />
         ))}
@@ -61,10 +64,7 @@ export function SearchResultsGrid({
   }
 
   return (
-    <motion.div
-      layout
-      className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-    >
+    <motion.div layout className={gridClass}>
       <AnimatePresence>
         {movies.map((movie, i) => (
           <MovieCard

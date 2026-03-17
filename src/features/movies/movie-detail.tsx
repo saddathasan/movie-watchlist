@@ -2,13 +2,11 @@ import { useState } from 'react'
 
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { RemoveFromWatchlistDialog } from '#/components/remove-from-watchlist-dialog'
-import { useAuth } from '#/integrations/auth/provider'
 import { backdropUrl, getMovieDetails } from '#/lib/tmdb'
 
-import { useWatchlist } from '../watchlist/hooks/use-watchlist'
+import { useWatchlistAction } from '../watchlist/hooks/use-watchlist-action'
 
 import { MovieDetailBackdrop } from './movie-detail-backdrop'
 import { MovieDetailCast } from './movie-detail-cast'
@@ -20,9 +18,15 @@ interface MovieDetailProps {
   movieId: number
 }
 
+const EMPTY_MOVIE = {
+  id: 0,
+  title: '',
+  poster_path: null,
+  release_date: '',
+  vote_average: 0,
+} as const
+
 export function MovieDetail({ movieId }: MovieDetailProps) {
-  const { user } = useAuth()
-  const { isInWatchlist, toggleWatchlist } = useWatchlist()
   const [trailerOpen, setTrailerOpen] = useState(false)
   const [pendingRemove, setPendingRemove] = useState(false)
 
@@ -36,29 +40,15 @@ export function MovieDetail({ movieId }: MovieDetailProps) {
     staleTime: 10 * 60 * 1000,
   })
 
-  const inList = movie ? isInWatchlist(movieId) : false
-
-  const handleWatchlist = async () => {
-    if (!user) {
-      toast.error('Please log in to use your watchlist')
-      return
-    }
-    if (!movie) return
-    await toggleWatchlist({
-      id: movie.id,
-      title: movie.title,
-      poster_path: movie.poster_path,
-      release_date: movie.release_date,
-      vote_average: movie.vote_average,
-    })
-    toast.success(inList ? 'Removed from watchlist' : 'Added to watchlist!')
-  }
+  // Hook called unconditionally — stable fallback used when movie not yet loaded.
+  // The toggle is never reachable before the movie resolves (early returns below).
+  const { inList, handleToggle } = useWatchlistAction(movie ?? EMPTY_MOVIE)
 
   const handleWatchlistClick = () => {
     if (inList) {
       setPendingRemove(true)
     } else {
-      void handleWatchlist()
+      void handleToggle()
     }
   }
 
@@ -92,7 +82,7 @@ export function MovieDetail({ movieId }: MovieDetailProps) {
     <div className="min-h-screen">
       <MovieDetailBackdrop backdropSrc={backdrop} />
 
-      <div className="relative z-10 -mt-48 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="page-container relative z-10 -mt-48">
         <button
           className="mb-6 flex cursor-pointer items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => window.history.back()}
@@ -118,7 +108,7 @@ export function MovieDetail({ movieId }: MovieDetailProps) {
         onCancel={() => setPendingRemove(false)}
         onConfirm={() => {
           setPendingRemove(false)
-          void handleWatchlist()
+          void handleToggle()
         }}
       />
 

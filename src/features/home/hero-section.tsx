@@ -1,20 +1,15 @@
 import { useEffect, useState } from 'react'
 
-import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Star, Play } from 'lucide-react'
 
-import { getTrendingMovies, backdropUrl } from '#/lib/tmdb'
+import { backdropUrl } from '#/lib/tmdb'
+
+import { useTrendingMovies } from './hooks/use-trending-movies'
 
 export function HeroSection() {
-  const { data } = useQuery({
-    queryKey: ['trending', 'week'],
-    queryFn: () => getTrendingMovies(),
-    staleTime: 1000 * 60 * 5,
-  })
-
-  const movies = data?.results.slice(0, 8) ?? []
+  const movies = useTrendingMovies()
   const [heroIdx, setHeroIdx] = useState(0)
   // .at() returns T | undefined — allows valid null-guard below
   const hero = movies.at(heroIdx)

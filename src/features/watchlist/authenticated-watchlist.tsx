@@ -5,13 +5,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { MovieCard } from '#/components'
+import { MovieCard, RemoveFromWatchlistDialog } from '#/components'
 import { Button } from '#/components/ui/button'
 
 import { DeleteButton } from './delete-button'
 import type { WatchlistEntry } from './hooks/use-watchlist'
 import { useWatchlist } from './hooks/use-watchlist'
-import { WatchlistDeleteDialog } from './watchlist-delete-dialog'
 import { WatchlistEmptyState } from './watchlist-empty-state'
 import { WatchlistSkeleton } from './watchlist-skeleton'
 
@@ -35,7 +34,7 @@ export function AuthenticatedWatchlist() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="page-container py-8">
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
@@ -92,9 +91,9 @@ export function AuthenticatedWatchlist() {
         </motion.div>
       )}
 
-      <WatchlistDeleteDialog
-        entry={pendingDelete}
+      <RemoveFromWatchlistDialog
         open={!!pendingDelete}
+        title={pendingDelete?.title ?? ''}
         onCancel={() => setPendingDelete(null)}
         onConfirm={handleConfirmDelete}
       />

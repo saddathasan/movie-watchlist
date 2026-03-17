@@ -1,18 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowRight, Play } from 'lucide-react'
 
-import { getTrendingMovies, posterUrl } from '#/lib/tmdb'
+import { posterUrl } from '#/lib/tmdb'
+
+import { useTrendingMovies } from './hooks/use-trending-movies'
 
 export function TrendingStrip() {
-  const { data } = useQuery({
-    queryKey: ['trending', 'week'],
-    queryFn: () => getTrendingMovies(),
-    staleTime: 1000 * 60 * 5,
-  })
-
-  const movies = data?.results.slice(0, 8) ?? []
+  const movies = useTrendingMovies()
 
   if (movies.length === 0) return null
 
