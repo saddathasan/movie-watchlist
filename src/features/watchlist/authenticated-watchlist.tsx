@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 
 import { MovieCard, RemoveFromWatchlistDialog } from '#/components'
 import { Button } from '#/components/ui/button'
+import { fadeDown, fadeIn } from '#/lib/motion'
 
 import { DeleteButton } from './delete-button'
 import type { WatchlistEntry } from './hooks/use-watchlist'
@@ -36,9 +37,9 @@ export function AuthenticatedWatchlist() {
   return (
     <div className="page-container py-8">
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={fadeDown.animate}
         className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-        initial={{ opacity: 0, y: -10 }}
+        initial={fadeDown.initial}
       >
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Watchlist</h1>
@@ -54,7 +55,7 @@ export function AuthenticatedWatchlist() {
               className="gap-2 cursor-pointer hover:text-primary"
               variant="outline"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="size-4" />
               Add More Movies
             </Button>
           </Link>
@@ -65,9 +66,9 @@ export function AuthenticatedWatchlist() {
         <WatchlistEmptyState />
       ) : (
         <motion.div
-          animate={{ opacity: 1 }}
+          animate={fadeIn.animate}
           className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-          initial={{ opacity: 0 }}
+          initial={fadeIn.initial}
         >
           <AnimatePresence mode="popLayout">
             {watchlist.map((entry, i) => (

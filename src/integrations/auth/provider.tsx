@@ -1,7 +1,6 @@
-'use client'
-
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -9,7 +8,8 @@ import {
   signOut as firebaseSignOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import { auth } from '../firebase/config'
+
+import { auth } from '#/integrations/firebase/config'
 
 interface AuthContextValue {
   user: User | null

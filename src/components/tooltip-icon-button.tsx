@@ -28,7 +28,7 @@ export function TooltipIconButton({
           <button
             aria-label={label}
             className={cn(
-              'flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-200',
+              'flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-200',
               active
                 ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:bg-primary hover:text-primary-foreground',

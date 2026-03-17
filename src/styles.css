@@ -104,14 +104,8 @@
   .page-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  .text-gold {
-    color: oklch(var(--gold));
-  }
   .bg-surface {
     background-color: oklch(var(--surface));
-  }
-  .bg-surface-hover {
-    background-color: oklch(var(--surface-hover));
   }
   .bg-overlay {
     background-color: oklch(var(--overlay));
@@ -136,13 +130,6 @@
       oklch(0.68 0.16 65)
     );
   }
-  .gradient-overlay {
-    background: linear-gradient(
-      to top,
-      oklch(0.13 0.02 255) 0%,
-      transparent 100%
-    );
-  }
   .hover-gradient-gold {
     transition:
       background 0.25s ease,
@@ -158,15 +145,13 @@
     color: oklch(var(--primary-foreground));
     border-color: transparent;
   }
-}
-
-/* Hide scrollbar utility */
-.scrollbar-hide {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Custom scrollbar */

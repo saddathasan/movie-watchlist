@@ -1,11 +1,13 @@
 // TMDB API client
 // Docs: https://developer.themoviedb.org/docs
 
+import { env } from '#/env'
+
 const BASE_URL = 'https://api.themoviedb.org/3'
 const IMAGE_BASE = 'https://image.tmdb.org/t/p'
 
 function getApiKey() {
-  return import.meta.env.VITE_TMDB_API_KEY as string
+  return env.VITE_TMDB_API_KEY
 }
 
 function buildUrl(path: string, params: Record<string, string> = {}) {

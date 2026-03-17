@@ -20,13 +20,13 @@ export function WatchlistPageContent() {
           action={
             <Link className="cursor-pointer" to="/">
               <Button className="gap-2">
-                <LogIn className="h-4 w-4" />
+                <LogIn className="size-4" />
                 Sign in
               </Button>
             </Link>
           }
           description="Your watchlist is saved per account. Sign in to access your saved movies from any device."
-          icon={<BookMarked className="h-10 w-10 text-muted-foreground" />}
+          icon={<BookMarked className="size-10 text-muted-foreground" />}
           title="Sign in to see your Watchlist"
         />
       </div>

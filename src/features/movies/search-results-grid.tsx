@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertCircle, Film } from 'lucide-react'
 
-import { MovieCard } from '#/components'
+import { EmptyState, MovieCard } from '#/components'
 import { Button } from '#/components/ui/button'
 import type { TMDBMovie } from '#/lib/tmdb'
 
@@ -28,15 +28,18 @@ export function SearchResultsGrid({
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <AlertCircle className="h-12 w-12 text-destructive" />
-        <h3 className="font-semibold text-lg">Something went wrong</h3>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Failed to fetch movies. Please check your connection or try again.
-        </p>
-        <Button variant="outline" onClick={onRetry}>
-          Try again
-        </Button>
+      <div className="py-20">
+        <EmptyState
+          action={
+            <Button variant="outline" onClick={onRetry}>
+              Try again
+            </Button>
+          }
+          description="Failed to fetch movies. Please check your connection or try again."
+          icon={<AlertCircle className="size-10 text-destructive" />}
+          title="Something went wrong"
+          variant="error"
+        />
       </div>
     )
   }
@@ -53,12 +56,12 @@ export function SearchResultsGrid({
 
   if (movies.length === 0 && isSearching) {
     return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <Film className="h-12 w-12 text-muted-foreground" />
-        <h3 className="font-semibold text-lg">No results found</h3>
-        <p className="text-sm text-muted-foreground">
-          Try a different title or check your spelling.
-        </p>
+      <div className="py-20">
+        <EmptyState
+          description="Try a different title or check your spelling."
+          icon={<Film className="size-10 text-muted-foreground" />}
+          title="No results found"
+        />
       </div>
     )
   }

@@ -3,7 +3,7 @@ import { Check, Plus } from 'lucide-react'
 import { TooltipIconButton } from '#/components'
 import type { TMDBMovie } from '#/lib/tmdb'
 
-import { useWatchlistAction } from '../watchlist/hooks/use-watchlist-action'
+import { useWatchlistAction } from '#/features/watchlist'
 
 interface WatchlistToggleButtonProps {
   movie: TMDBMovie
@@ -15,13 +15,7 @@ export function WatchlistToggleButton({ movie }: WatchlistToggleButtonProps) {
   return (
     <TooltipIconButton
       active={inList}
-      icon={
-        inList ? (
-          <Check className="size-4" />
-        ) : (
-          <Plus className="size-4" />
-        )
-      }
+      icon={inList ? <Check className="size-4" /> : <Plus className="size-4" />}
       label={inList ? 'Remove from watchlist' : 'Add to watchlist'}
       onClick={handleToggle}
     />

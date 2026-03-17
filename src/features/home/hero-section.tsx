@@ -4,7 +4,9 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Star, Play } from 'lucide-react'
 
+import { scaleIn, transitions } from '#/lib/motion'
 import { backdropUrl } from '#/lib/tmdb'
+import { cn } from '#/lib/utils'
 
 import { useTrendingMovies } from './hooks/use-trending-movies'
 
@@ -29,18 +31,18 @@ export function HeroSection() {
       {bg ? (
         <motion.div
           key={hero?.id}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={scaleIn.animate}
           className="absolute inset-0"
-          initial={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
+          initial={scaleIn.initial}
+          transition={transitions.cinematic}
         >
           <img alt="" className="h-full w-full object-cover" src={bg} />
         </motion.div>
       ) : null}
 
       {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-linear-to-r from-background via-background/60 to-transparent" />
-      <div className="absolute inset-0 bg-linear-to-t from-background via-background/30 to-background/60" />
+      <div className="absolute inset-0 bg-linear-to-r from-background via-background/40 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-background via-background/20 to-background/60" />
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-linear-to-t from-background to-transparent" />
 
       {/* Hero content */}
@@ -52,11 +54,11 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-xl"
               initial={{ opacity: 0, y: 30 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ ...transitions.slow, delay: 0.2 }}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-1.5 rounded-full bg-foreground/10 backdrop-blur-sm px-3 py-1">
-                  <Star className="h-3 w-3 fill-primary text-primary" />
+                  <Star className="size-3 fill-primary text-primary" />
                   <span className="text-xs font-medium text-foreground/80">
                     {hero.vote_average.toFixed(1)}
                   </span>
@@ -80,7 +82,7 @@ export function HeroSection() {
                   params={{ id: String(hero.id) }}
                   to="/movie/$id"
                 >
-                  <Play className="h-4 w-4 fill-current" />
+                  <Play className="size-4 fill-current" />
                   View Details
                 </Link>
                 <Link
@@ -101,11 +103,12 @@ export function HeroSection() {
           {movies.slice(0, 5).map((_, i) => (
             <button
               key={i}
-              className={`h-1 rounded-full transition-all duration-500 cursor-pointer ${
+              className={cn(
+                'h-1 rounded-full transition-all duration-500 cursor-pointer',
                 i === heroIdx
                   ? 'w-8 bg-primary'
-                  : 'w-3 bg-foreground/20 hover:bg-foreground/40'
-              }`}
+                  : 'w-3 bg-foreground/20 hover:bg-foreground/40',
+              )}
               onClick={() => setHeroIdx(i)}
             />
           ))}

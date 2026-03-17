@@ -21,7 +21,7 @@ export function MovieDetailCast({ cast }: MovieDetailCastProps) {
               key={member.id}
               className="flex flex-col items-center gap-2 shrink-0 w-20"
             >
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-secondary ring-2 ring-border/40 shrink-0">
+              <div className="size-20 rounded-full overflow-hidden bg-secondary ring-2 ring-border/40 shrink-0">
                 {photo ? (
                   <img
                     alt={member.name}
@@ -31,7 +31,7 @@ export function MovieDetailCast({ cast }: MovieDetailCastProps) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-muted-foreground" />
+                    <User className="size-8 text-muted-foreground" />
                   </div>
                 )}
               </div>

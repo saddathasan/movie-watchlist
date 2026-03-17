@@ -1,12 +1,13 @@
 import { useState } from 'react'
 
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft } from 'lucide-react'
+import { getRouteApi } from '@tanstack/react-router'
+import { AlertCircle, ArrowLeft } from 'lucide-react'
 
-import { RemoveFromWatchlistDialog } from '#/components/remove-from-watchlist-dialog'
+import { EmptyState, RemoveFromWatchlistDialog } from '#/components'
+import { Button } from '#/components/ui/button'
+import { useWatchlistAction } from '#/features/watchlist'
 import { backdropUrl, getMovieDetails } from '#/lib/tmdb'
-
-import { useWatchlistAction } from '../watchlist/hooks/use-watchlist-action'
 
 import { MovieDetailBackdrop } from './movie-detail-backdrop'
 import { MovieDetailCast } from './movie-detail-cast'
@@ -14,9 +15,7 @@ import { MovieDetailInfo } from './movie-detail-info'
 import { MovieDetailSkeleton } from './movie-detail-skeleton'
 import { MovieTrailerModal } from './movie-trailer-modal'
 
-interface MovieDetailProps {
-  movieId: number
-}
+const routeApi = getRouteApi('/movie/$id')
 
 const EMPTY_MOVIE = {
   id: 0,
@@ -26,7 +25,9 @@ const EMPTY_MOVIE = {
   vote_average: 0,
 } as const
 
-export function MovieDetail({ movieId }: MovieDetailProps) {
+export function MovieDetail() {
+  const { id } = routeApi.useParams()
+  const movieId = parseInt(id, 10)
   const [trailerOpen, setTrailerOpen] = useState(false)
   const [pendingRemove, setPendingRemove] = useState(false)
 
@@ -56,14 +57,18 @@ export function MovieDetail({ movieId }: MovieDetailProps) {
 
   if (isError || !movie) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-destructive">Failed to load movie details.</p>
-        <button
-          className="cursor-pointer text-sm text-primary hover:underline"
-          onClick={() => window.history.back()}
-        >
-          Go back
-        </button>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <EmptyState
+          action={
+            <Button variant="outline" onClick={() => window.history.back()}>
+              Go back
+            </Button>
+          }
+          description="Failed to load movie details. Please try again."
+          icon={<AlertCircle className="size-10 text-destructive" />}
+          title="Something went wrong"
+          variant="error"
+        />
       </div>
     )
   }
@@ -87,7 +92,7 @@ export function MovieDetail({ movieId }: MovieDetailProps) {
           className="mb-6 flex cursor-pointer items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => window.history.back()}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           Back
         </button>
 

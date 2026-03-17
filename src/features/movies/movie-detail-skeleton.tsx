@@ -3,11 +3,11 @@ import { Skeleton } from '#/components/ui/skeleton'
 export function MovieDetailSkeleton() {
   return (
     <div className="min-h-screen">
-      <div className="h-[50vh] md:h-[60vh] bg-surface animate-pulse" />
-      <div className="page-container -mt-48 relative z-10">
-        <div className="mb-6 h-5 w-16 bg-surface animate-pulse rounded" />
-        <div className="flex flex-col md:flex-row gap-8">
-          <Skeleton className="w-48 md:w-64 aspect-2/3 rounded-lg shrink-0 mx-auto md:mx-0" />
+      <Skeleton className="h-[50vh] rounded-none md:h-[60vh]" />
+      <div className="page-container relative z-10 -mt-48">
+        <Skeleton className="mb-6 h-5 w-16" />
+        <div className="flex flex-col gap-8 md:flex-row">
+          <Skeleton className="mx-auto aspect-2/3 w-48 shrink-0 rounded-lg md:mx-0 md:w-64" />
           <div className="flex-1 space-y-4">
             <Skeleton className="h-12 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
@@ -20,21 +20,21 @@ export function MovieDetailSkeleton() {
               <Skeleton className="h-11 w-44 rounded-lg" />
               <Skeleton className="h-11 w-28 rounded-lg" />
             </div>
-            <Skeleton className="h-7 w-32 mt-6" />
+            <Skeleton className="mt-6 h-7 w-32" />
             <Skeleton className="h-24 w-full max-w-2xl" />
           </div>
         </div>
         <div className="mt-12">
-          <Skeleton className="h-7 w-32 mb-5" />
+          <Skeleton className="mb-5 h-7 w-32" />
           <div className="flex gap-5">
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="flex flex-col items-center gap-2 shrink-0 w-20"
+                className="flex w-20 shrink-0 flex-col items-center gap-2"
               >
-                <Skeleton className="w-20 h-20 rounded-full" />
-                <Skeleton className="h-3 w-16 rounded" />
-                <Skeleton className="h-3 w-12 rounded" />
+                <Skeleton className="size-20 rounded-full" />
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-3 w-12" />
               </div>
             ))}
           </div>

@@ -1,15 +1,13 @@
-import { Toaster } from '#/components/ui/sonner'
 import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 
+import { Toaster } from '#/components/ui/sonner'
 import { Navbar } from '#/features/layout'
-
 import { AuthProvider } from '#/integrations/auth/provider'
-import TanStackQueryProvider from '#/integrations/tanstack-query/root-provider'
-
+import { TanStackQueryProvider } from '#/integrations/tanstack-query/root-provider'
 import appCss from '#/styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'

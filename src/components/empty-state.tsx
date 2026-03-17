@@ -2,11 +2,15 @@ import type { ReactNode } from 'react'
 
 import { motion } from 'framer-motion'
 
+import { fadeUp, transitions } from '#/lib/motion'
+import { cn } from '#/lib/utils'
+
 export interface EmptyStateProps {
   icon: ReactNode
   title: string
   description: string
-  action: ReactNode
+  action?: ReactNode
+  variant?: 'default' | 'error'
 }
 
 export function EmptyState({
@@ -14,22 +18,28 @@ export function EmptyState({
   title,
   description,
   action,
+  variant = 'default',
 }: EmptyStateProps) {
   return (
     <motion.div
-      animate={{ opacity: 1, y: 0 }}
+      animate={fadeUp.animate}
       className="flex flex-col items-center text-center"
-      initial={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.4 }}
+      initial={fadeUp.initial}
+      transition={transitions.default}
     >
-      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-muted">
+      <div
+        className={cn(
+          'mb-6 flex size-20 items-center justify-center rounded-3xl',
+          variant === 'error' ? 'bg-destructive/10' : 'bg-muted',
+        )}
+      >
         {icon}
       </div>
       <h2 className="mb-3 text-2xl font-semibold text-foreground">{title}</h2>
       <p className="mb-8 max-w-sm text-sm text-muted-foreground">
         {description}
       </p>
-      {action}
+      {action ? action : null}
     </motion.div>
   )
 }

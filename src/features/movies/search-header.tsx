@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { TrendingUp } from 'lucide-react'
 
+import { fadeIn, transitions } from '#/lib/motion'
+
 interface SearchHeaderProps {
   isSearching: boolean
   query: string
@@ -18,10 +20,10 @@ export function SearchHeader({
     <AnimatePresence mode="wait">
       <motion.div
         key={isSearching ? 'search' : 'trending'}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        initial={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+        animate={fadeIn.animate}
+        exit={fadeIn.exit}
+        initial={fadeIn.initial}
+        transition={transitions.fast}
       >
         {isSearching ? (
           <div>
@@ -36,7 +38,7 @@ export function SearchHeader({
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
+            <TrendingUp className="size-5 text-primary" />
             <h2 className="font-semibold text-lg">Trending This Week</h2>
           </div>
         )}

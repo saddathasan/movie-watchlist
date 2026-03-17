@@ -41,15 +41,22 @@ export function useWatchlist() {
     }
 
     setLoading(true)
-    const unsubscribe = onSnapshot(watchlistRef(user.uid), (snapshot) => {
-      const entries: WatchlistEntry[] = []
-      snapshot.forEach((docSnap) => {
-        entries.push(docSnap.data() as WatchlistEntry)
-      })
-      entries.sort((a, b) => b.addedAt - a.addedAt)
-      setWatchlist(entries)
-      setLoading(false)
-    })
+    const unsubscribe = onSnapshot(
+      watchlistRef(user.uid),
+      (snapshot) => {
+        const entries: WatchlistEntry[] = []
+        snapshot.forEach((docSnap) => {
+          entries.push(docSnap.data() as WatchlistEntry)
+        })
+        entries.sort((a, b) => b.addedAt - a.addedAt)
+        setWatchlist(entries)
+        setLoading(false)
+      },
+      (error) => {
+        console.error('Watchlist snapshot error:', error)
+        setLoading(false)
+      },
+    )
 
     return unsubscribe
   }, [user])

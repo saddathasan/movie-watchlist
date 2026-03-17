@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowRight, Play } from 'lucide-react'
 
+import { fadeUp, staggerDelay } from '#/lib/motion'
 import { posterUrl } from '#/lib/tmdb'
 
 import { useTrendingMovies } from './hooks/use-trending-movies'
@@ -27,7 +28,7 @@ export function TrendingStrip() {
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             to="/search"
           >
-            View All <ArrowRight className="h-3 w-3" />
+            View All <ArrowRight className="size-3" />
           </Link>
         </div>
 
@@ -35,10 +36,10 @@ export function TrendingStrip() {
           {movies.map((movie, i) => (
             <motion.div
               key={movie.id}
-              animate={{ opacity: 1, y: 0 }}
+              animate={fadeUp.animate}
               className="shrink-0"
-              initial={{ opacity: 0, y: 20 }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
+              initial={fadeUp.initial}
+              transition={{ ...staggerDelay(i, 0.08), duration: 0.5 }}
             >
               <Link
                 className="group block w-36 sm:w-40 lg:w-44 cursor-pointer"
@@ -55,7 +56,7 @@ export function TrendingStrip() {
                     />
                   ) : (
                     <div className="h-full w-full bg-secondary flex items-center justify-center">
-                      <Play className="h-8 w-8 text-muted-foreground" />
+                      <Play className="size-8 text-muted-foreground" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-linear-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

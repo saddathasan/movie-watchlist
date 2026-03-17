@@ -20,14 +20,12 @@ export function useWatchlistAction(movie: WatchlistMovieInput) {
       toast.error('Please log in to use your watchlist')
       return
     }
-    await toggleWatchlist({
-      id: movie.id,
-      title: movie.title,
-      poster_path: movie.poster_path,
-      release_date: movie.release_date,
-      vote_average: movie.vote_average,
-    })
-    toast.success(inList ? 'Removed from watchlist' : 'Added to watchlist!')
+    try {
+      await toggleWatchlist(movie)
+      toast.success(inList ? 'Removed from watchlist' : 'Added to watchlist!')
+    } catch {
+      toast.error('Something went wrong. Please try again.')
+    }
   }
 
   return { inList, handleToggle }

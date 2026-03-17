@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion'
 import { Calendar, Clock, PlayCircle, Plus, Star } from 'lucide-react'
 
+import { buttonPress, fadeUp, transitions } from '#/lib/motion'
 import { posterUrl } from '#/lib/tmdb'
 import type { TMDBMovieDetails } from '#/lib/tmdb'
+import { cn } from '#/lib/utils'
 
 export interface MovieDetailInfoProps {
   movie: TMDBMovieDetails
@@ -25,10 +27,10 @@ export function MovieDetailInfo({
 
   return (
     <motion.div
-      animate={{ opacity: 1, y: 0 }}
+      animate={fadeUp.animate}
       className="flex flex-col md:flex-row gap-8"
-      initial={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.4 }}
+      initial={fadeUp.initial}
+      transition={transitions.default}
     >
       {/* Poster */}
       <div className="shrink-0">
@@ -56,7 +58,7 @@ export function MovieDetailInfo({
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           {movie.vote_average > 0 ? (
             <span className="flex items-center gap-1.5">
-              <Star className="h-4 w-4 fill-primary text-primary" />
+              <Star className="size-4 fill-primary text-primary" />
               <span className="font-semibold text-foreground">
                 {movie.vote_average.toFixed(1)}
               </span>
@@ -65,13 +67,13 @@ export function MovieDetailInfo({
           ) : null}
           {runtime ? (
             <span className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
+              <Clock className="size-4" />
               {runtime}
             </span>
           ) : null}
           {year ? (
             <span className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="size-4" />
               {year}
             </span>
           ) : null}
@@ -92,18 +94,19 @@ export function MovieDetailInfo({
 
         <div className="mt-6 flex flex-wrap gap-3">
           <button
-            className={`flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer ${
+            className={cn(
+              'flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer',
               inList
                 ? 'bg-secondary text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground'
-                : 'gradient-gold text-primary-foreground hover:opacity-90'
-            }`}
+                : 'gradient-gold text-primary-foreground hover:opacity-90',
+            )}
             onClick={onWatchlistClick}
           >
             {inList ? (
               'Remove from Watchlist'
             ) : (
               <>
-                <Plus className="h-4 w-4" />
+                <Plus className="size-4" />
                 Add to Watchlist
               </>
             )}
@@ -112,11 +115,11 @@ export function MovieDetailInfo({
           {hasTrailer ? (
             <motion.button
               className="hover-gradient-gold flex items-center gap-2 rounded-lg border border-white/20 bg-transparent px-6 py-3 text-lg font-semibold text-foreground cursor-pointer"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={buttonPress.whileHover}
+              whileTap={buttonPress.whileTap}
               onClick={onTrailerClick}
             >
-              <PlayCircle className="h-5 w-5" />
+              <PlayCircle className="size-5" />
               Trailer
             </motion.button>
           ) : null}

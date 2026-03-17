@@ -1,12 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { MovieDetail } from '#/features/movies'
+// Direct import to avoid Rollup circular chunk deps with TanStack Router code-splitting
+import { MovieDetail } from '#/features/movies/movie-detail'
 
 export const Route = createFileRoute('/movie/$id')({
-  component: MovieDetailPage,
+  component: MovieDetail,
 })
-
-function MovieDetailPage() {
-  const { id } = Route.useParams()
-  return <MovieDetail movieId={parseInt(id, 10)} />
-}

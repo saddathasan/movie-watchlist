@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { useQuery } from '@tanstack/react-query'
+import { getRouteApi } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 
+import { fadeDown, transitions } from '#/lib/motion'
 import { getTrendingMovies, searchMovies } from '#/lib/tmdb'
 
 import { SearchBar } from './search-bar'
@@ -10,22 +12,23 @@ import { SearchHeader } from './search-header'
 import { SearchPagination } from './search-pagination'
 import { SearchResultsGrid } from './search-results-grid'
 
-interface SearchContentProps {
-  initialQuery?: string
-  onQueryChange: (q: string | undefined) => void
-}
+const routeApi = getRouteApi('/search')
 
-export function SearchContent({
-  initialQuery = '',
-  onQueryChange,
-}: SearchContentProps) {
+export function SearchContent() {
+  const { q } = routeApi.useSearch()
+  const navigate = routeApi.useNavigate()
+
+  const initialQuery = q ?? ''
   const [inputValue, setInputValue] = useState(initialQuery)
   const [query, setQuery] = useState(initialQuery)
   const [page, setPage] = useState(1)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    onQueryChange(query || undefined)
+    navigate({
+      search: (prev) => ({ ...prev, q: query || undefined }),
+      replace: true,
+    })
     setPage(1)
   }, [query])
 
@@ -50,10 +53,10 @@ export function SearchContent({
   })
 
   const trendingQ = useQuery({
-    queryKey: ['movies', 'trending'],
+    queryKey: ['trending', 'week'],
     queryFn: getTrendingMovies,
     enabled: query.length === 0,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   })
 
   const isSearching = query.length > 0
@@ -68,10 +71,10 @@ export function SearchContent({
     <div className="page-container py-8">
       {/* Hero search bar */}
       <motion.div
-        animate={{ opacity: 1, y: 0 }}
+        animate={fadeDown.animate}
         className="mb-10 text-center"
-        initial={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.4 }}
+        initial={fadeDown.initial}
+        transition={transitions.default}
       >
         <h1 className="mb-3 text-4xl font-bold tracking-tight sm:text-5xl">
           Discover Movies
