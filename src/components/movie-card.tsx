@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Film, Star } from 'lucide-react'
 
+import { WatchedRibbon } from '#/features/watchlist/watched-ribbon'
 import { scaleFade, staggerDelay } from '#/lib/motion'
 import { posterUrl } from '#/lib/tmdb'
 
@@ -15,6 +16,7 @@ export interface MovieCardProps {
   voteAverage: number
   index?: number
   action?: ReactNode
+  watched?: boolean
 }
 
 export function MovieCard({
@@ -25,6 +27,7 @@ export function MovieCard({
   voteAverage,
   index = 0,
   action,
+  watched = false,
 }: MovieCardProps) {
   const poster = posterUrl(posterPath, 'w342')
   const year = releaseDate.slice(0, 4) || 'N/A'
@@ -58,6 +61,9 @@ export function MovieCard({
             </div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+          {/* Watched ribbon — rendered inside overflow-hidden so it clips naturally */}
+          <WatchedRibbon watched={watched} />
         </div>
       </Link>
 

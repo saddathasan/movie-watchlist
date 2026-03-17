@@ -27,7 +27,7 @@ export function DesktopNav({
   return (
     <div className="hidden items-center gap-4 md:flex">
       <Link
-        activeOptions={{ exact: true }}
+        activeOptions={{ exact: true, includeSearch: false }}
         activeProps={{ className: activeNavLink }}
         className={baseNavLink}
         to="/search"

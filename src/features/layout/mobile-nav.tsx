@@ -39,7 +39,7 @@ export function MobileNav({
     >
       <div className="container mx-auto flex flex-col gap-1 px-4 py-3">
         <Link
-          activeOptions={{ exact: true }}
+          activeOptions={{ exact: true, includeSearch: false }}
           activeProps={{ className: activeNavLink }}
           className={baseNavLink}
           to="/search"

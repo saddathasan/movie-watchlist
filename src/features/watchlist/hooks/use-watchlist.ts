@@ -6,6 +6,7 @@ import {
   doc,
   onSnapshot,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore'
 
 import { useAuth } from '#/integrations/auth/provider'
@@ -26,6 +27,7 @@ export interface WatchlistEntry {
   release_date: string
   vote_average: number
   addedAt: number
+  watchedAt: number | null
 }
 
 export function useWatchlist() {
@@ -46,7 +48,12 @@ export function useWatchlist() {
       (snapshot) => {
         const entries: WatchlistEntry[] = []
         snapshot.forEach((docSnap) => {
-          entries.push(docSnap.data() as WatchlistEntry)
+          const data = docSnap.data()
+          entries.push({
+            ...(data as Omit<WatchlistEntry, 'watchedAt'>),
+            // Coerce missing watchedAt (existing docs) to null
+            watchedAt: data.watchedAt ?? null,
+          })
         })
         entries.sort((a, b) => b.addedAt - a.addedAt)
         setWatchlist(entries)
@@ -64,11 +71,14 @@ export function useWatchlist() {
   const isInWatchlist = (movieId: number) =>
     watchlist.some((m) => m.id === movieId)
 
-  const addToWatchlist = async (entry: Omit<WatchlistEntry, 'addedAt'>) => {
+  const addToWatchlist = async (
+    entry: Omit<WatchlistEntry, 'addedAt' | 'watchedAt'>,
+  ) => {
     if (!user) return
     await setDoc(movieDocRef(user.uid, entry.id), {
       ...entry,
       addedAt: Date.now(),
+      watchedAt: null,
     })
   }
 
@@ -77,12 +87,21 @@ export function useWatchlist() {
     await deleteDoc(movieDocRef(user.uid, movieId))
   }
 
-  const toggleWatchlist = async (entry: Omit<WatchlistEntry, 'addedAt'>) => {
+  const toggleWatchlist = async (
+    entry: Omit<WatchlistEntry, 'addedAt' | 'watchedAt'>,
+  ) => {
     if (isInWatchlist(entry.id)) {
       await removeFromWatchlist(entry.id)
     } else {
       await addToWatchlist(entry)
     }
+  }
+
+  const markWatched = async (movieId: number, watched: boolean) => {
+    if (!user) return
+    await updateDoc(movieDocRef(user.uid, movieId), {
+      watchedAt: watched ? Date.now() : null,
+    })
   }
 
   return {
@@ -92,5 +111,6 @@ export function useWatchlist() {
     addToWatchlist,
     removeFromWatchlist,
     toggleWatchlist,
+    markWatched,
   }
 }
