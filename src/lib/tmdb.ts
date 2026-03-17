@@ -123,8 +123,8 @@ export async function getMovieDetails(id: number): Promise<TMDBMovieDetails> {
   return apiFetch(`/movie/${id}`, { append_to_response: 'credits,videos' })
 }
 
-export async function getTrendingMovies(): Promise<TMDBSearchResult> {
-  return apiFetch('/trending/movie/week')
+export async function getTrendingMovies(page = 1): Promise<TMDBSearchResult> {
+  return apiFetch('/trending/movie/week', { page: String(page) })
 }
 
 export async function getMoviesByIds(

@@ -7,6 +7,7 @@ interface SearchHeaderProps {
   isSearching: boolean
   query: string
   totalResults: number
+  loadedCount: number
   isLoading: boolean
 }
 
@@ -14,6 +15,7 @@ export function SearchHeader({
   isSearching,
   query,
   totalResults,
+  loadedCount,
   isLoading,
 }: SearchHeaderProps) {
   return (
@@ -27,19 +29,20 @@ export function SearchHeader({
       >
         {isSearching ? (
           <div>
-            <h2 className="font-semibold text-lg">
+            <h2 className="text-lg font-semibold">
               Results for &ldquo;{query}&rdquo;
             </h2>
             {!isLoading ? (
               <p className="text-sm text-muted-foreground">
-                {totalResults.toLocaleString()} movies found
+                Showing {loadedCount.toLocaleString()} of{' '}
+                {totalResults.toLocaleString()} movies
               </p>
             ) : null}
           </div>
         ) : (
           <div className="flex items-center gap-2">
             <TrendingUp className="size-5 text-primary" />
-            <h2 className="font-semibold text-lg">Trending This Week</h2>
+            <h2 className="text-lg font-semibold">Trending This Week</h2>
           </div>
         )}
       </motion.div>

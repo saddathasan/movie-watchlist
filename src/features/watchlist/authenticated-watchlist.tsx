@@ -74,6 +74,8 @@ export function AuthenticatedWatchlist() {
             {watchlist.map((entry, i) => (
               <MovieCard
                 key={entry.id}
+                enableExit
+                enableLayout
                 action={
                   <DeleteButton
                     title={entry.title}
