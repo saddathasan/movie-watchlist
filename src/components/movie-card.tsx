@@ -15,10 +15,6 @@ export interface MovieCardProps {
   voteAverage: number
   index?: number
   action?: ReactNode
-  /** Enable layout animation — only needed when items can be removed (e.g. watchlist). Off by default for perf. */
-  enableLayout?: boolean
-  /** Enable exit animation — only needed inside AnimatePresence with removals. Off by default. */
-  enableExit?: boolean
 }
 
 export function MovieCard({
@@ -29,18 +25,16 @@ export function MovieCard({
   voteAverage,
   index = 0,
   action,
-  enableLayout = false,
-  enableExit = false,
 }: MovieCardProps) {
   const poster = posterUrl(posterPath, 'w342')
   const year = releaseDate.slice(0, 4) || 'N/A'
 
   return (
     <motion.div
-      layout={enableLayout}
+      layout
       animate={scaleFade.animate}
       className="group relative rounded-xl bg-surface shadow-card transition-transform duration-300 hover:-translate-y-1"
-      exit={enableExit ? scaleFade.exit : undefined}
+      exit={scaleFade.exit}
       initial={scaleFade.initial}
       transition={{ ...staggerDelay(index), duration: 0.35 }}
     >

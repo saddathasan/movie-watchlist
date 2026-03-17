@@ -1,12 +1,10 @@
-import { Fragment, useCallback, useRef } from 'react'
-
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { AlertCircle, Film } from 'lucide-react'
 
 import { EmptyState, MovieCard } from '#/components'
 import { Button } from '#/components/ui/button'
-import { fadeUp, staggerDelay, transitions } from '#/lib/motion'
-import type { TMDBSearchResult } from '#/lib/tmdb'
+import { fadeIn, fadeUp, staggerDelay, transitions } from '#/lib/motion'
+import type { TMDBMovie } from '#/lib/tmdb'
 
 import { MovieCardSkeleton } from './movie-card-skeleton'
 import { WatchlistToggleButton } from './watchlist-toggle-button'
@@ -14,12 +12,10 @@ import { WatchlistToggleButton } from './watchlist-toggle-button'
 interface SearchResultsGridProps {
   isLoading: boolean
   isError: boolean
-  pages: TMDBSearchResult[]
-  isSearching: boolean
   isFetching: boolean
-  isFetchingNextPage: boolean
-  hasNextPage: boolean
-  fetchNextPage: () => void
+  isSearching: boolean
+  movies: TMDBMovie[]
+  page: number
   onRetry: () => void
 }
 
@@ -29,38 +25,12 @@ const GRID_CLASS =
 export function SearchResultsGrid({
   isLoading,
   isError,
-  pages,
-  isSearching,
   isFetching,
-  isFetchingNextPage,
-  hasNextPage,
-  fetchNextPage,
+  isSearching,
+  movies,
+  page,
   onRetry,
 }: SearchResultsGridProps) {
-  // Track how many pages were rendered before this render to identify new pages
-  const prevPageCountRef = useRef(pages.length)
-
-  // Callback ref pattern — no race condition, no useEffect needed
-  const observerRef = useRef<IntersectionObserver | null>(null)
-  const sentinelRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (observerRef.current) observerRef.current.disconnect()
-      if (!node) return
-
-      observerRef.current = new IntersectionObserver(
-        ([entry]) => {
-          // Guard: hasNextPage AND not already fetching (any kind)
-          if (entry.isIntersecting && hasNextPage && !isFetching) {
-            fetchNextPage()
-          }
-        },
-        { rootMargin: '300px' },
-      )
-      observerRef.current.observe(node)
-    },
-    [hasNextPage, isFetching, fetchNextPage],
-  )
-
   if (isError) {
     return (
       <div className="py-20">
@@ -89,8 +59,7 @@ export function SearchResultsGrid({
     )
   }
 
-  const allEmpty = pages.every((p) => p.results.length === 0)
-  if (allEmpty && isSearching) {
+  if (movies.length === 0 && isSearching) {
     return (
       <div className="py-20">
         <EmptyState
@@ -102,55 +71,44 @@ export function SearchResultsGrid({
     )
   }
 
-  // Snapshot prev page count before updating ref — used to determine which
-  // pages are "new" this render and should animate in
-  const firstNewPageIndex = prevPageCountRef.current
-  prevPageCountRef.current = pages.length
-
   return (
-    <>
-      <div className={GRID_CLASS}>
-        {pages.map((page, pageIndex) => {
-          const isNewPage = pageIndex >= firstNewPageIndex
-          return (
-            <Fragment key={page.page}>
-              {page.results.map((movie, i) => (
-                <motion.div
-                  key={movie.id}
-                  animate={fadeUp.animate}
-                  // Only animate items from newly appended pages
-                  initial={isNewPage ? fadeUp.initial : false}
-                  transition={
-                    isNewPage
-                      ? { ...staggerDelay(i, 0.03), ...transitions.default }
-                      : undefined
-                  }
-                >
-                  <MovieCard
-                    action={<WatchlistToggleButton movie={movie} />}
-                    id={movie.id}
-                    index={0}
-                    posterPath={movie.poster_path}
-                    releaseDate={movie.release_date}
-                    title={movie.title}
-                    voteAverage={movie.vote_average}
-                  />
-                </motion.div>
-              ))}
-            </Fragment>
-          )
-        })}
-
-        {/* Skeleton placeholders while fetching next page — fills the grid row */}
-        {isFetchingNextPage
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <MovieCardSkeleton key={`skeleton-${i}`} />
-            ))
-          : null}
-      </div>
-
-      {/* Invisible sentinel — IntersectionObserver watches this */}
-      <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />
-    </>
+    // Dim the grid while a new page is fetching (cache miss); instant when prefetched
+    <div
+      className="transition-opacity duration-200"
+      style={{ opacity: isFetching ? 0.5 : 1 }}
+    >
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={page}
+          animate={fadeIn.animate}
+          className={GRID_CLASS}
+          exit={fadeIn.exit}
+          initial={fadeIn.initial}
+          transition={transitions.fast}
+        >
+          {movies.map((movie, index) => (
+            <motion.div
+              key={movie.id}
+              animate={fadeUp.animate}
+              initial={fadeUp.initial}
+              transition={{
+                ...staggerDelay(index, 0.03),
+                ...transitions.default,
+              }}
+            >
+              <MovieCard
+                action={<WatchlistToggleButton movie={movie} />}
+                id={movie.id}
+                index={index}
+                posterPath={movie.poster_path}
+                releaseDate={movie.release_date}
+                title={movie.title}
+                voteAverage={movie.vote_average}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   )
 }

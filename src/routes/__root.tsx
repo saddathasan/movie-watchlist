@@ -44,7 +44,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <AuthProvider>
             <Navbar />
             <main className="flex-1">{children}</main>
-            <Toaster richColors position="top-right" />
+            <Toaster />
             {/* <TanStackDevtools
               config={{ position: 'bottom-right' }}
               plugins={[

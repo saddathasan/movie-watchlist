@@ -5,23 +5,23 @@ import { fadeIn, transitions } from '#/lib/motion'
 
 interface SearchHeaderProps {
   isSearching: boolean
+  isTrendingFirstPage?: boolean
   query: string
   totalResults: number
-  loadedCount: number
   isLoading: boolean
 }
 
 export function SearchHeader({
   isSearching,
+  isTrendingFirstPage = false,
   query,
   totalResults,
-  loadedCount,
   isLoading,
 }: SearchHeaderProps) {
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={isSearching ? 'search' : 'trending'}
+        key={isSearching ? 'search' : 'browse'}
         animate={fadeIn.animate}
         exit={fadeIn.exit}
         initial={fadeIn.initial}
@@ -34,15 +34,19 @@ export function SearchHeader({
             </h2>
             {!isLoading ? (
               <p className="text-sm text-muted-foreground">
-                Showing {loadedCount.toLocaleString()} of{' '}
-                {totalResults.toLocaleString()} movies
+                {totalResults.toLocaleString()} movies found
               </p>
             ) : null}
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <TrendingUp className="size-5 text-primary" />
-            <h2 className="text-lg font-semibold">Trending This Week</h2>
+          <div>
+            <h2 className="text-lg font-semibold">Explore Movies</h2>
+            {isTrendingFirstPage ? (
+              <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                <TrendingUp className="size-3.5 text-primary" />
+                Trending this week
+              </p>
+            ) : null}
           </div>
         )}
       </motion.div>
