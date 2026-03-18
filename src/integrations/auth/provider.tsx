@@ -2,9 +2,10 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
@@ -14,6 +15,7 @@ import { auth } from '#/integrations/firebase/config'
 interface AuthContextValue {
   user: User | null
   loading: boolean
+  resetPassword: (email: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -41,12 +43,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await createUserWithEmailAndPassword(auth, email, password)
   }
 
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email)
+  }
+
   const signOut = async () => {
     await firebaseSignOut(auth)
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{ user, loading, resetPassword, signIn, signUp, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   )

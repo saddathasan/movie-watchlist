@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useForm } from '@tanstack/react-form'
 import { useRouter } from '@tanstack/react-router'
@@ -11,11 +11,12 @@ import { useAuth } from '#/integrations/auth/provider'
 import { collapse, fadeSwap, transitions } from '#/lib/motion'
 
 import { AuthErrorBanner } from './auth-error-banner'
+import { ForgotPasswordForm } from './forgot-password-form'
 import { loginSchema, signupSchema } from './auth-schemas'
 import { inputClass, PasswordInput } from './password-input'
 import { PasswordStrengthMeter } from './password-strength-meter'
 
-type AuthMode = 'login' | 'signup'
+type AuthMode = 'forgot' | 'login' | 'signup'
 
 interface AuthSheetProps {
   open: boolean
@@ -28,10 +29,14 @@ export function AuthSheet({
   onOpenChange,
   defaultMode = 'login',
 }: AuthSheetProps) {
-  const { signIn, signUp } = useAuth()
+  const { resetPassword, signIn, signUp } = useAuth()
   const router = useRouter()
   const [mode, setMode] = useState<AuthMode>(defaultMode)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotError, setForgotError] = useState<string | null>(null)
+  const [forgotSubmitting, setForgotSubmitting] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
   const [passwordValue, setPasswordValue] = useState('')
 
   const form = useForm({
@@ -75,9 +80,23 @@ export function AuthSheet({
     },
   })
 
+  useEffect(() => {
+    if (resendCooldown === 0) return
+
+    const timerId = window.setInterval(() => {
+      setResendCooldown((seconds) => (seconds <= 1 ? 0 : seconds - 1))
+    }, 1000)
+
+    return () => window.clearInterval(timerId)
+  }, [resendCooldown])
+
   const resetState = () => {
     setAuthError(null)
+    setForgotEmail('')
+    setForgotError(null)
+    setForgotSubmitting(false)
     setPasswordValue('')
+    setResendCooldown(0)
     form.reset()
   }
 
@@ -86,10 +105,57 @@ export function AuthSheet({
     resetState()
   }
 
+  const openForgotPassword = () => {
+    setMode('forgot')
+    setAuthError(null)
+    setForgotError(null)
+    setForgotEmail(form.state.values.email)
+  }
+
+  const backToLogin = () => {
+    setMode('login')
+    setForgotError(null)
+  }
+
+  const handleForgotPasswordSubmit = async () => {
+    setForgotError(null)
+
+    const email = forgotEmail.trim()
+    const result = loginSchema.pick({ email: true }).safeParse({ email })
+    if (!result.success) {
+      setForgotError(result.error.issues[0].message)
+      return
+    }
+
+    setForgotSubmitting(true)
+    try {
+      await resetPassword(email)
+      setForgotEmail(email)
+      setResendCooldown(30)
+      toast.success('Check your inbox. If the email exists, reset link sent.')
+    } catch (err: unknown) {
+      const msg = (err as { code?: string }).code
+      if (msg === 'auth/invalid-email') {
+        setForgotError('Please enter a valid email address.')
+      } else if (msg === 'auth/too-many-requests') {
+        setForgotError('Too many requests right now. Try again in a bit.')
+      } else {
+        setForgotError('Could not send reset link. Please try again.')
+      }
+    } finally {
+      setForgotSubmitting(false)
+    }
+  }
+
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) resetState()
+    if (!nextOpen) {
+      resetState()
+      setMode(defaultMode)
+    }
     onOpenChange(nextOpen)
   }
+
+  const currentError = mode === 'forgot' ? forgotError : authError
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -110,153 +176,181 @@ export function AuthSheet({
               </span>
             </div>
 
-            {/* Heading */}
             <AnimatePresence mode="wait">
-              <motion.div
-                key={mode}
-                animate={fadeSwap.animate}
-                className="mb-8"
-                exit={fadeSwap.exit}
-                initial={fadeSwap.initial}
-                transition={{ ...transitions.fast, ease: 'easeOut' }}
-              >
-                <h2 className="font-display text-4xl leading-none text-foreground">
-                  {mode === 'login' ? (
-                    <>
-                      WELCOME <span className="text-primary">BACK</span>
-                    </>
-                  ) : (
-                    <>
-                      JOIN <span className="text-primary">US</span>
-                    </>
-                  )}
-                </h2>
-                <p className="mt-3 font-form text-sm text-muted-foreground">
-                  {mode === 'login'
-                    ? 'Sign in to continue to your watchlist'
-                    : 'Create your account to start tracking films'}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Form */}
-            <form
-              className="space-y-3"
-              onSubmit={(e) => {
-                e.preventDefault()
-                form.handleSubmit()
-              }}
-            >
-              {/* Email */}
-              <form.Field name="email">
-                {(field) => (
-                  <div className="group relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                    <input
-                      autoComplete="email"
-                      className={inputClass}
-                      id="email"
-                      placeholder="Email address"
-                      required
-                      type="email"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                    />
+              {mode === 'forgot' ? (
+                <motion.div
+                  key="forgot"
+                  animate={fadeSwap.animate}
+                  exit={fadeSwap.exit}
+                  initial={fadeSwap.initial}
+                  transition={{ ...transitions.fast, ease: 'easeOut' }}
+                >
+                  <ForgotPasswordForm
+                    cooldownSeconds={resendCooldown}
+                    email={forgotEmail}
+                    isSubmitting={forgotSubmitting}
+                    onBackToSignIn={backToLogin}
+                    onEmailChange={setForgotEmail}
+                    onSubmit={handleForgotPasswordSubmit}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={mode}
+                  animate={fadeSwap.animate}
+                  exit={fadeSwap.exit}
+                  initial={fadeSwap.initial}
+                  transition={{ ...transitions.fast, ease: 'easeOut' }}
+                >
+                  <div className="mb-8">
+                    <h2 className="font-display text-4xl leading-none text-foreground">
+                      {mode === 'login' ? (
+                        <>
+                          WELCOME <span className="text-primary">BACK</span>
+                        </>
+                      ) : (
+                        <>
+                          JOIN <span className="text-primary">US</span>
+                        </>
+                      )}
+                    </h2>
+                    <p className="mt-3 font-form text-sm text-muted-foreground">
+                      {mode === 'login'
+                        ? 'Sign in to continue to your watchlist'
+                        : 'Create your account to start tracking films'}
+                    </p>
                   </div>
-                )}
-              </form.Field>
 
-              {/* Password */}
-              <form.Field name="password">
-                {(field) => (
-                  <div className="space-y-0">
-                    <PasswordInput
-                      autoComplete={
-                        mode === 'login' ? 'current-password' : 'new-password'
-                      }
-                      field={field}
-                      icon={
-                        <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                      }
-                      placeholder="Password"
-                      onValueChange={setPasswordValue}
-                    />
-
-                    {/* Strength meter — signup only */}
-                    <AnimatePresence>
-                      {mode === 'signup' ? (
-                        <PasswordStrengthMeter
-                          key="strength-meter"
-                          password={passwordValue}
-                        />
-                      ) : null}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </form.Field>
-
-              {/* Confirm password — signup only */}
-              <AnimatePresence>
-                {mode === 'signup' ? (
-                  <motion.div
-                    animate={collapse.animate}
-                    exit={collapse.exit}
-                    initial={collapse.initial}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  <form
+                    className="space-y-3"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      form.handleSubmit()
+                    }}
                   >
-                    <form.Field name="confirmPassword">
+                    <form.Field name="email">
                       {(field) => (
-                        <PasswordInput
-                          autoComplete="new-password"
-                          field={field}
-                          icon={
-                            <ShieldCheck className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                          }
-                          placeholder="Confirm password"
-                        />
+                        <div className="group relative">
+                          <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                          <input
+                            autoComplete="email"
+                            className={inputClass}
+                            id="email"
+                            placeholder="Email address"
+                            required
+                            type="email"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                          />
+                        </div>
                       )}
                     </form.Field>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
 
-              {/* Error banner */}
-              <AnimatePresence>
-                <AuthErrorBanner error={authError} />
-              </AnimatePresence>
+                    <form.Field name="password">
+                      {(field) => (
+                        <div className="space-y-0">
+                          <PasswordInput
+                            autoComplete={
+                              mode === 'login'
+                                ? 'current-password'
+                                : 'new-password'
+                            }
+                            field={field}
+                            icon={
+                              <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                            }
+                            placeholder="Password"
+                            onValueChange={setPasswordValue}
+                          />
 
-              {/* Submit */}
-              <form.Subscribe selector={(s) => s.isSubmitting}>
-                {(isSubmitting) => (
-                  <button
-                    className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl font-form py-3.5 text-sm font-semibold text-primary-foreground gradient-gold transition-all hover:shadow-glow disabled:opacity-50"
-                    disabled={isSubmitting}
-                    type="submit"
-                  >
-                    {isSubmitting
-                      ? 'Please wait…'
-                      : mode === 'login'
-                        ? 'Sign In'
-                        : 'Create Account'}
-                    {isSubmitting ? null : <ArrowRight className="size-3.5" />}
-                  </button>
-                )}
-              </form.Subscribe>
-            </form>
+                          <AnimatePresence>
+                            {mode === 'signup' ? (
+                              <PasswordStrengthMeter
+                                key="strength-meter"
+                                password={passwordValue}
+                              />
+                            ) : null}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </form.Field>
 
-            {/* Mode toggle */}
-            <p className="mt-4 text-center font-form text-xs text-muted-foreground">
-              {mode === 'login'
-                ? "Don't have an account?"
-                : 'Already have an account?'}{' '}
-              <button
-                className="cursor-pointer font-medium text-primary hover:underline"
-                onClick={toggleMode}
-              >
-                {mode === 'login' ? 'Sign up' : 'Sign in'}
-              </button>
-            </p>
+                    <AnimatePresence>
+                      {mode === 'signup' ? (
+                        <motion.div
+                          animate={collapse.animate}
+                          exit={collapse.exit}
+                          initial={collapse.initial}
+                          transition={{ duration: 0.25, ease: 'easeOut' }}
+                        >
+                          <form.Field name="confirmPassword">
+                            {(field) => (
+                              <PasswordInput
+                                autoComplete="new-password"
+                                field={field}
+                                icon={
+                                  <ShieldCheck className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                                }
+                                placeholder="Confirm password"
+                              />
+                            )}
+                          </form.Field>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+
+                    {mode === 'login' ? (
+                      <div className="-mt-1 text-right">
+                        <button
+                          className="cursor-pointer font-form text-xs text-primary hover:underline"
+                          type="button"
+                          onClick={openForgotPassword}
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                    ) : null}
+
+                    <form.Subscribe selector={(s) => s.isSubmitting}>
+                      {(isSubmitting) => (
+                        <button
+                          className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl font-form py-3.5 text-sm font-semibold text-primary-foreground gradient-gold transition-all hover:shadow-glow disabled:opacity-50"
+                          disabled={isSubmitting}
+                          type="submit"
+                        >
+                          {isSubmitting
+                            ? 'Please wait...'
+                            : mode === 'login'
+                              ? 'Sign In'
+                              : 'Create Account'}
+                          {isSubmitting ? null : (
+                            <ArrowRight className="size-3.5" />
+                          )}
+                        </button>
+                      )}
+                    </form.Subscribe>
+                  </form>
+
+                  <p className="mt-4 text-center font-form text-xs text-muted-foreground">
+                    {mode === 'login'
+                      ? "Don't have an account?"
+                      : 'Already have an account?'}{' '}
+                    <button
+                      className="cursor-pointer font-medium text-primary hover:underline"
+                      type="button"
+                      onClick={toggleMode}
+                    >
+                      {mode === 'login' ? 'Sign up' : 'Sign in'}
+                    </button>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              <AuthErrorBanner error={currentError} />
+            </AnimatePresence>
           </div>
         </div>
 
