@@ -3,16 +3,11 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+
 import { Toaster } from '#/components/ui/sonner'
-
-import Navbar from '#/components/Navbar'
-
-import TanStackQueryProvider from '#/integrations/tanstack-query/root-provider'
-import TanStackQueryDevtools from '#/integrations/tanstack-query/devtools'
+import { Navbar } from '#/features/layout'
 import { AuthProvider } from '#/integrations/auth/provider'
-
+import { TanStackQueryProvider } from '#/integrations/tanstack-query/root-provider'
 import appCss from '#/styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
@@ -29,7 +24,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { title: 'CineWatch — Movie Watchlist' },
       {
         name: 'description',
-        content: 'Search for movies, explore details, and build your personal watchlist.',
+        content:
+          'Search for movies, explore details, and build your personal watchlist.',
       },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
@@ -47,11 +43,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TanStackQueryProvider>
           <AuthProvider>
             <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Toaster richColors position="top-right" />
-            <TanStackDevtools
+            <main className="flex-1">{children}</main>
+            <Toaster />
+            {/* <TanStackDevtools
               config={{ position: 'bottom-right' }}
               plugins={[
                 {
@@ -60,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 },
                 TanStackQueryDevtools,
               ]}
-            />
+            /> */}
           </AuthProvider>
         </TanStackQueryProvider>
         <Scripts />

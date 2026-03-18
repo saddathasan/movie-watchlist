@@ -1,11 +1,13 @@
 // TMDB API client
 // Docs: https://developer.themoviedb.org/docs
 
+import { env } from '#/env'
+
 const BASE_URL = 'https://api.themoviedb.org/3'
 const IMAGE_BASE = 'https://image.tmdb.org/t/p'
 
 function getApiKey() {
-  return import.meta.env.VITE_TMDB_API_KEY as string
+  return env.VITE_TMDB_API_KEY
 }
 
 function buildUrl(path: string, params: Record<string, string> = {}) {
@@ -17,7 +19,10 @@ function buildUrl(path: string, params: Record<string, string> = {}) {
   return url.toString()
 }
 
-async function apiFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+async function apiFetch<T>(
+  path: string,
+  params: Record<string, string> = {},
+): Promise<T> {
   const res = await fetch(buildUrl(path, params))
   if (!res.ok) {
     throw new Error(`TMDB API error: ${res.status} ${res.statusText}`)
@@ -26,17 +31,26 @@ async function apiFetch<T>(path: string, params: Record<string, string> = {}): P
 }
 
 // --- Image helpers ---
-export function posterUrl(posterPath: string | null, size: 'w185' | 'w342' | 'w500' | 'original' = 'w342') {
+export function posterUrl(
+  posterPath: string | null,
+  size: 'w185' | 'w342' | 'w500' | 'original' = 'w342',
+) {
   if (!posterPath) return null
   return `${IMAGE_BASE}/${size}${posterPath}`
 }
 
-export function backdropUrl(backdropPath: string | null, size: 'w780' | 'w1280' | 'original' = 'w1280') {
+export function backdropUrl(
+  backdropPath: string | null,
+  size: 'w780' | 'w1280' | 'original' = 'w1280',
+) {
   if (!backdropPath) return null
   return `${IMAGE_BASE}/${size}${backdropPath}`
 }
 
-export function profileUrl(profilePath: string | null, size: 'w45' | 'w185' | 'h632' | 'original' = 'w185') {
+export function profileUrl(
+  profilePath: string | null,
+  size: 'w45' | 'w185' | 'h632' | 'original' = 'w185',
+) {
   if (!profilePath) return null
   return `${IMAGE_BASE}/${size}${profilePath}`
 }
@@ -98,7 +112,10 @@ export interface TMDBSearchResult {
 }
 
 // --- API functions ---
-export async function searchMovies(query: string, page = 1): Promise<TMDBSearchResult> {
+export async function searchMovies(
+  query: string,
+  page = 1,
+): Promise<TMDBSearchResult> {
   return apiFetch('/search/movie', { query, page: String(page) })
 }
 
@@ -106,10 +123,12 @@ export async function getMovieDetails(id: number): Promise<TMDBMovieDetails> {
   return apiFetch(`/movie/${id}`, { append_to_response: 'credits,videos' })
 }
 
-export async function getTrendingMovies(): Promise<TMDBSearchResult> {
-  return apiFetch('/trending/movie/week')
+export async function getTrendingMovies(page = 1): Promise<TMDBSearchResult> {
+  return apiFetch('/trending/movie/week', { page: String(page) })
 }
 
-export async function getMoviesByIds(ids: number[]): Promise<TMDBMovieDetails[]> {
+export async function getMoviesByIds(
+  ids: number[],
+): Promise<TMDBMovieDetails[]> {
   return Promise.all(ids.map((id) => getMovieDetails(id)))
 }

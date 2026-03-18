@@ -1,37 +1,54 @@
-"use client"
+import { useEffect, useState } from 'react'
 
-import {
-  CircleCheckIcon,
-  InfoIcon,
-  Loader2Icon,
-  OctagonXIcon,
-  TriangleAlertIcon,
-} from "lucide-react"
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { CircleCheckIcon, Loader2Icon, OctagonXIcon } from 'lucide-react'
+import { Toaster as Sonner } from 'sonner'
+import type { ToasterProps } from 'sonner'
+
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(min-width: 640px)').matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 640px)')
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  return isDesktop
+}
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const isDesktop = useIsDesktop()
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        success: <CircleCheckIcon className="size-4 text-primary" />,
+        error: <OctagonXIcon className="size-4 text-destructive" />,
+        loading: (
+          <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
+        ),
       }}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-        } as React.CSSProperties
-      }
+      offset={isDesktop ? { top: 80 } : undefined}
+      position={isDesktop ? 'top-right' : 'bottom-center'}
+      theme="dark"
+      toastOptions={{
+        classNames: {
+          toast:
+            'border-l-2 border-l-transparent bg-card/80 backdrop-blur-xl shadow-card rounded-[var(--radius)] border border-border',
+          success: 'border-l-primary',
+          error: 'border-l-destructive',
+          loading: 'border-l-muted-foreground',
+          title: 'font-medium text-sm text-foreground',
+          description: 'text-xs text-muted-foreground',
+          icon: 'mt-0.5',
+        },
+      }}
       {...props}
     />
   )

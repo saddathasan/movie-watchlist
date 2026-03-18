@@ -1,13 +1,16 @@
-import {
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  collection,
-} from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { db } from '../integrations/firebase/config'
-import { useAuth } from '../integrations/auth/provider'
+
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore'
+
+import { useAuth } from '#/integrations/auth/provider'
+import { db } from '#/integrations/firebase/config'
 
 function watchlistRef(userId: string) {
   return collection(db, 'users', userId, 'watchlist')
@@ -24,6 +27,7 @@ export interface WatchlistEntry {
   release_date: string
   vote_average: number
   addedAt: number
+  watchedAt: number | null
 }
 
 export function useWatchlist() {
@@ -39,16 +43,27 @@ export function useWatchlist() {
     }
 
     setLoading(true)
-    const unsubscribe = onSnapshot(watchlistRef(user.uid), (snapshot) => {
-      const entries: WatchlistEntry[] = []
-      snapshot.forEach((docSnap) => {
-        entries.push(docSnap.data() as WatchlistEntry)
-      })
-      // Sort by most recently added
-      entries.sort((a, b) => b.addedAt - a.addedAt)
-      setWatchlist(entries)
-      setLoading(false)
-    })
+    const unsubscribe = onSnapshot(
+      watchlistRef(user.uid),
+      (snapshot) => {
+        const entries: WatchlistEntry[] = []
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data()
+          entries.push({
+            ...(data as Omit<WatchlistEntry, 'watchedAt'>),
+            // Coerce missing watchedAt (existing docs) to null
+            watchedAt: data.watchedAt ?? null,
+          })
+        })
+        entries.sort((a, b) => b.addedAt - a.addedAt)
+        setWatchlist(entries)
+        setLoading(false)
+      },
+      (error) => {
+        console.error('Watchlist snapshot error:', error)
+        setLoading(false)
+      },
+    )
 
     return unsubscribe
   }, [user])
@@ -56,11 +71,14 @@ export function useWatchlist() {
   const isInWatchlist = (movieId: number) =>
     watchlist.some((m) => m.id === movieId)
 
-  const addToWatchlist = async (entry: Omit<WatchlistEntry, 'addedAt'>) => {
+  const addToWatchlist = async (
+    entry: Omit<WatchlistEntry, 'addedAt' | 'watchedAt'>,
+  ) => {
     if (!user) return
     await setDoc(movieDocRef(user.uid, entry.id), {
       ...entry,
       addedAt: Date.now(),
+      watchedAt: null,
     })
   }
 
@@ -69,12 +87,21 @@ export function useWatchlist() {
     await deleteDoc(movieDocRef(user.uid, movieId))
   }
 
-  const toggleWatchlist = async (entry: Omit<WatchlistEntry, 'addedAt'>) => {
+  const toggleWatchlist = async (
+    entry: Omit<WatchlistEntry, 'addedAt' | 'watchedAt'>,
+  ) => {
     if (isInWatchlist(entry.id)) {
       await removeFromWatchlist(entry.id)
     } else {
       await addToWatchlist(entry)
     }
+  }
+
+  const markWatched = async (movieId: number, watched: boolean) => {
+    if (!user) return
+    await updateDoc(movieDocRef(user.uid, movieId), {
+      watchedAt: watched ? Date.now() : null,
+    })
   }
 
   return {
@@ -84,5 +111,6 @@ export function useWatchlist() {
     addToWatchlist,
     removeFromWatchlist,
     toggleWatchlist,
+    markWatched,
   }
 }
