@@ -26,7 +26,7 @@ export function HeroSection() {
   }, [movies.length])
 
   return (
-    <section className="relative h-svh -mt-16 overflow-hidden">
+    <section className="relative h-[82svh] sm:h-svh -mt-16 overflow-hidden">
       {/* Background image */}
       {bg ? (
         <motion.div
@@ -46,7 +46,7 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-linear-to-t from-background to-transparent" />
 
       {/* Hero content */}
-      <div className="relative z-10 flex h-full items-end pb-32 lg:pb-40">
+      <div className="relative z-10 flex h-full items-end pb-24 sm:pb-32 lg:pb-40">
         <div className="mx-auto w-full max-w-7xl px-4 lg:px-8">
           {hero ? (
             <motion.div
@@ -99,7 +99,7 @@ export function HeroSection() {
 
       {/* Dot navigation */}
       {movies.length > 1 ? (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+        <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 gap-2 sm:bottom-16">
           {movies.slice(0, 5).map((_, i) => (
             <button
               key={i}

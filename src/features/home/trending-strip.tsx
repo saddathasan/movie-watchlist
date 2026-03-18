@@ -13,7 +13,7 @@ export function TrendingStrip() {
   if (movies.length === 0) return null
 
   return (
-    <section className="relative -mt-20 z-20 pb-16">
+    <section className="relative z-20 mt-0 sm:-mt-12 lg:-mt-20 pb-16">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="flex items-end justify-between mb-6">
           <div>
