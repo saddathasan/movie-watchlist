@@ -18,7 +18,7 @@ export function AuthErrorBanner({ error }: AuthErrorBannerProps) {
       initial={collapse.initial}
       transition={transitions.fast}
     >
-      <AlertCircle className="size-4 flex-shrink-0" />
+      <AlertCircle className="size-4 shrink-0" />
       <span className="font-form">{error}</span>
     </motion.div>
   )

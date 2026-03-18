@@ -23,7 +23,7 @@ export function MarkWatchedButton({
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="origin-right scale-75">
+          <div className="flex size-7 shrink-0 cursor-pointer items-center justify-center">
             <Switch
               aria-label={
                 watched
@@ -31,9 +31,10 @@ export function MarkWatchedButton({
                   : `Mark "${title}" as watched`
               }
               checked={watched}
+              size="sm"
               onCheckedChange={(checked) => onToggle(movieId, checked)}
             />
-          </span>
+          </div>
         </TooltipTrigger>
         <TooltipContent>
           <p>{watched ? 'Mark as unwatched' : 'Mark as watched'}</p>
