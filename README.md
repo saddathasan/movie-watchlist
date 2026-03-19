@@ -17,6 +17,45 @@ To build this application for production:
 pnpm build
 ```
 
+## Cloudflare Workers Deploy
+
+Primary deploy path is Cloudflare Workers.
+
+### Manual Deploy
+
+```bash
+pnpm install --frozen-lockfile
+pnpm run check
+pnpm run deploy:workers
+```
+
+`wrangler` requires `CLOUDFLARE_API_TOKEN` in non-interactive environments.
+
+### GitHub Auto Deploy (main)
+
+This repo includes a workflow that deploys on push to `main`.
+
+Required GitHub repository secrets:
+
+- `CLOUDFLARE_API_TOKEN`
+- `VITE_TMDB_API_KEY`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+
+Optional secret:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+
+### Custom Domain + Firebase
+
+- Bind route/domain `cinewatch.saddathasan.dev/*` to the Worker in Cloudflare.
+- Ensure DNS for `cinewatch.saddathasan.dev` is proxied.
+- Add both worker host and `cinewatch.saddathasan.dev` to Firebase Auth authorized domains.
+
 ## Testing
 
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:

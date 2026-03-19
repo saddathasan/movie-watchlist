@@ -13,7 +13,7 @@
     "lint": "eslint",
     "format": "prettier --check .",
     "check": "prettier --write . && eslint --fix",
-    "deploy": "pnpm run build && wrangler deploy"
+    "deploy:workers": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.8",
