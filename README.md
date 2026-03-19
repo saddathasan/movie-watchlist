@@ -2,7 +2,9 @@
 
 CineWatch is a movie discovery and watchlist application built for a frontend interview submission. It helps users discover trending films, search the TMDB catalog, view rich movie details, and save titles to a personal watchlist.
 
-Live URL (production): `https://cinewatch.saddathasan.dev`
+Live URL (production): [https://cinewatch.saddathasan.dev](https://cinewatch.saddathasan.dev)
+
+Demo video (Google Drive): [<add-link>](add-link)
 
 ## Intro
 
