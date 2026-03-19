@@ -8,7 +8,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from 'firebase/auth'
-import type { User } from 'firebase/auth'
+import type { User, UserCredential } from 'firebase/auth'
 
 import { auth } from '#/integrations/firebase/config'
 
@@ -16,8 +16,8 @@ interface AuthContextValue {
   user: User | null
   loading: boolean
   resetPassword: (email: string) => Promise<void>
-  signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string) => Promise<UserCredential['user']>
+  signUp: (email: string, password: string) => Promise<UserCredential['user']>
   signOut: () => Promise<void>
 }
 
@@ -36,11 +36,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password)
+    const credential = await signInWithEmailAndPassword(auth, email, password)
+    return credential.user
   }
 
   const signUp = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password)
+    const credential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    )
+    return credential.user
   }
 
   const resetPassword = async (email: string) => {

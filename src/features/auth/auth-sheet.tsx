@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 
 import { useForm } from '@tanstack/react-form'
 import { useRouter } from '@tanstack/react-router'
+import { collection, getDocs, limit, query } from 'firebase/firestore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Film, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Sheet, SheetContent } from '#/components/ui/sheet'
 import { useAuth } from '#/integrations/auth/provider'
+import { db } from '#/integrations/firebase/config'
 import { collapse, fadeSwap, transitions } from '#/lib/motion'
 
 import { AuthErrorBanner } from './auth-error-banner'
@@ -49,7 +51,7 @@ export function AuthSheet({
   onOpenChange,
   defaultMode = 'login',
 }: AuthSheetProps) {
-  const { resetPassword, signIn, signUp } = useAuth()
+  const { resetPassword, signIn, signUp, user } = useAuth()
   const router = useRouter()
   const [mode, setMode] = useState<AuthMode>(defaultMode)
   const [authError, setAuthError] = useState<string | null>(null)
@@ -73,14 +75,26 @@ export function AuthSheet({
 
       try {
         if (mode === 'login') {
-          await signIn(value.email, value.password)
+          const signedInUser = await signIn(value.email, value.password)
           toast.success('Welcome back. Your watchlist is ready.')
+          closeAndReset()
+          try {
+            const targetRoute = await resolvePostAuthRoute(signedInUser.uid)
+            router.navigate({ to: targetRoute })
+          } catch {
+            router.navigate({ to: '/search' })
+          }
         } else {
-          await signUp(value.email, value.password)
+          const createdUser = await signUp(value.email, value.password)
           toast.success('Account created. Welcome to CineWatch.')
+          closeAndReset()
+          try {
+            const targetRoute = await resolvePostAuthRoute(createdUser.uid)
+            router.navigate({ to: targetRoute })
+          } catch {
+            router.navigate({ to: '/search' })
+          }
         }
-        onOpenChange(false)
-        router.navigate({ to: '/watchlist' })
       } catch (err: unknown) {
         const msg = (err as { code?: string }).code
         if (
@@ -118,6 +132,21 @@ export function AuthSheet({
     setPasswordValue('')
     setResendCooldown(0)
     form.reset()
+  }
+
+  const closeAndReset = () => {
+    resetState()
+    setMode(defaultMode)
+    onOpenChange(false)
+  }
+
+  const resolvePostAuthRoute = async (uid: string) => {
+    const firstDocQuery = query(
+      collection(db, 'users', uid, 'watchlist'),
+      limit(1),
+    )
+    const snapshot = await getDocs(firstDocQuery)
+    return snapshot.empty ? '/search' : '/watchlist'
   }
 
   const toggleMode = () => {
@@ -168,6 +197,12 @@ export function AuthSheet({
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen && !user) {
+      setMode('login')
+      setAuthError(null)
+      setForgotError(null)
+    }
+
     if (!nextOpen) {
       resetState()
       setMode(defaultMode)
