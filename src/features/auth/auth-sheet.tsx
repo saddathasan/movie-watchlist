@@ -11,12 +11,32 @@ import { useAuth } from '#/integrations/auth/provider'
 import { collapse, fadeSwap, transitions } from '#/lib/motion'
 
 import { AuthErrorBanner } from './auth-error-banner'
+import { AuthModeHeader } from './auth-mode-header'
 import { ForgotPasswordForm } from './forgot-password-form'
 import { loginSchema, signupSchema } from './auth-schemas'
 import { inputClass, PasswordInput } from './password-input'
 import { PasswordStrengthMeter } from './password-strength-meter'
 
 type AuthMode = 'forgot' | 'login' | 'signup'
+
+const AUTH_MODE_COPY = {
+  login: {
+    kicker: 'Welcome back',
+    title: 'Your next great watch is waiting.',
+    subtitle: 'Sign in to pick up your watchlist and keep momentum.',
+    submitLabel: 'Sign in',
+    toggleAction: 'Create account',
+    togglePrompt: 'New here?',
+  },
+  signup: {
+    kicker: 'Create your account',
+    title: 'Build your personal cinema journal.',
+    subtitle: 'Save films, track progress, and return anytime.',
+    submitLabel: 'Create account',
+    toggleAction: 'Sign in',
+    togglePrompt: 'Already have an account?',
+  },
+} as const
 
 interface AuthSheetProps {
   open: boolean
@@ -54,10 +74,10 @@ export function AuthSheet({
       try {
         if (mode === 'login') {
           await signIn(value.email, value.password)
-          toast.success('Welcome back!')
+          toast.success('Welcome back. Your watchlist is ready.')
         } else {
           await signUp(value.email, value.password)
-          toast.success('Account created! Welcome to CineWatch.')
+          toast.success('Account created. Welcome to CineWatch.')
         }
         onOpenChange(false)
         router.navigate({ to: '/watchlist' })
@@ -169,9 +189,9 @@ export function AuthSheet({
           {/* Inner container — capped + centered on larger screens */}
           <div className="mx-auto w-full sm:max-w-xs lg:max-w-sm">
             {/* Logo */}
-            <div className="mb-10 flex items-center gap-3">
-              <Film className="size-9 shrink-0 text-primary" />
-              <span className="font-display text-4xl leading-none tracking-wider text-foreground">
+            <div className="mb-8 flex items-center gap-2.5">
+              <Film className="size-7 shrink-0 text-primary/90" />
+              <span className="font-display text-2xl leading-none tracking-[0.16em] text-foreground/95">
                 CINE<span className="text-primary">WATCH</span>
               </span>
             </div>
@@ -202,24 +222,11 @@ export function AuthSheet({
                   initial={fadeSwap.initial}
                   transition={{ ...transitions.fast, ease: 'easeOut' }}
                 >
-                  <div className="mb-8">
-                    <h2 className="font-display text-4xl leading-none text-foreground">
-                      {mode === 'login' ? (
-                        <>
-                          WELCOME <span className="text-primary">BACK</span>
-                        </>
-                      ) : (
-                        <>
-                          JOIN <span className="text-primary">US</span>
-                        </>
-                      )}
-                    </h2>
-                    <p className="mt-3 font-form text-sm text-muted-foreground">
-                      {mode === 'login'
-                        ? 'Sign in to continue to your watchlist'
-                        : 'Create your account to start tracking films'}
-                    </p>
-                  </div>
+                  <AuthModeHeader
+                    kicker={AUTH_MODE_COPY[mode].kicker}
+                    subtitle={AUTH_MODE_COPY[mode].subtitle}
+                    title={AUTH_MODE_COPY[mode].title}
+                  />
 
                   <form
                     className="space-y-3"
@@ -321,9 +328,7 @@ export function AuthSheet({
                         >
                           {isSubmitting
                             ? 'Please wait...'
-                            : mode === 'login'
-                              ? 'Sign In'
-                              : 'Create Account'}
+                            : AUTH_MODE_COPY[mode].submitLabel}
                           {isSubmitting ? null : (
                             <ArrowRight className="size-3.5" />
                           )}
@@ -333,15 +338,13 @@ export function AuthSheet({
                   </form>
 
                   <p className="mt-4 text-center font-form text-xs text-muted-foreground">
-                    {mode === 'login'
-                      ? "Don't have an account?"
-                      : 'Already have an account?'}{' '}
+                    {AUTH_MODE_COPY[mode].togglePrompt}{' '}
                     <button
                       className="cursor-pointer font-medium text-primary hover:underline"
                       type="button"
                       onClick={toggleMode}
                     >
-                      {mode === 'login' ? 'Sign up' : 'Sign in'}
+                      {AUTH_MODE_COPY[mode].toggleAction}
                     </button>
                   </p>
                 </motion.div>

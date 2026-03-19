@@ -46,7 +46,7 @@ export function MobileNav({
           onClick={onNavigate}
         >
           <Search className="size-4" />
-          Search
+          Discover Movies
         </Link>
 
         {user ? (

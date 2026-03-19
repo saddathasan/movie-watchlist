@@ -1,262 +1,208 @@
-Welcome to Cinewatch, your one-stop movie watchlist manager. 
+# CineWatch
 
-# Getting Started
+CineWatch is a movie discovery and watchlist application built for a frontend interview submission. It helps users discover trending films, search the TMDB catalog, view rich movie details, and save titles to a personal watchlist.
 
-To run this application:
+Live URL (production): [https://cinewatch.saddathasan.dev](https://cinewatch.saddathasan.dev)
 
-```bash
-pnpm install
-pnpm dev
+Demo video (Google Drive): [<add-link>](add-link)
+
+## Intro
+
+This app focuses on a clean, responsive user experience with a feature-first codebase. Core user journeys include:
+
+- Browse weekly trending movies from TMDB
+- Search movies with query + pagination
+- View movie detail pages with metadata, cast, and trailer access
+- Sign up / sign in / reset password with Firebase Auth
+- After requesting password reset, users should check inbox and spam folder for reset email
+- Persist a per-user watchlist with Firestore
+
+The implementation prioritizes component architecture discipline, accessibility-minded UI patterns, and production-oriented deployment on Cloudflare Workers.
+
+## Tech Stack
+
+### Frontend
+
+- React 19
+- TypeScript (strict mode)
+- Vite 7
+
+### Routing, Data, Forms
+
+- TanStack Router (file-based routing)
+- TanStack Query (server state + caching)
+- TanStack Form (auth form state/validation flow)
+
+### UI and Motion
+
+- Tailwind CSS v4
+- shadcn/ui primitives
+- Framer Motion
+- Sonner (toast notifications)
+- Lucide icons
+
+### Backend Services
+
+- TMDB API (movie data)
+- Firebase Auth (email/password auth + reset)
+- Firestore (watchlist persistence)
+
+### Deployment
+
+- Cloudflare Workers
+- Wrangler
+
+## Key Dependencies
+
+### Runtime Dependencies
+
+- `@tanstack/react-start` - app runtime and server entry for Workers
+- `@tanstack/react-router` - route definitions and navigation
+- `@tanstack/react-query` - cached async data fetching
+- `@tanstack/react-form` - controlled form state and submit lifecycle
+- `firebase` - authentication and Firestore integration
+- `zod` + `@t3-oss/env-core` - runtime environment validation
+- `tailwindcss` + `@tailwindcss/vite` - styling system and Vite integration
+- `framer-motion` - animation and transition polish
+
+### Development Dependencies
+
+- `typescript` - static typing and strict checks
+- `eslint` + `@tanstack/eslint-config` - linting rules and architecture consistency
+- `prettier` - formatting
+- `vitest` + testing-library packages - test tooling (currently minimal coverage)
+- `wrangler` - local/dev/deploy workflow for Cloudflare Workers
+
+## Architecture
+
+The codebase follows a feature-first structure:
+
+- Route files are composition-focused and lightweight
+- Feature modules own business logic and UI orchestration
+- Shared UI components live in `src/components`
+- External service setup is isolated under `src/integrations`
+
+### Project Structure
+
+```txt
+src/
+├── components/                # Shared UI used across features
+├── features/
+│   ├── auth/                  # Auth sheet, login/signup/reset flows
+│   ├── home/                  # Hero + trending strip
+│   ├── layout/                # Navbar + navigation variants
+│   ├── movies/                # Search + movie detail flows
+│   └── watchlist/             # Watchlist page and actions
+├── integrations/
+│   ├── auth/                  # Auth provider + hook
+│   ├── firebase/              # Firebase app/auth/firestore config
+│   └── tanstack-query/        # Query provider/devtools
+├── lib/                       # TMDB client, utility helpers
+├── routes/                    # TanStack file-based route entries
+├── env.ts                     # Runtime env validation
+├── router.tsx                 # Router setup
+└── routeTree.gen.ts           # Generated route tree (do not edit)
 ```
 
-# Building For Production
+### Frontend Flow Diagram
 
-To build this application for production:
+```mermaid
+flowchart TD
+    A[User] --> B[TanStack Router Routes]
 
-```bash
-pnpm build
+    B --> C[Home Feature]
+    B --> D[Movies Feature]
+    B --> E[Watchlist Feature]
+    B --> F[Auth Feature]
+
+    C --> G[TMDB Client]
+    D --> G
+
+    E --> H[Auth Provider]
+    E --> I[Firestore]
+
+    F --> H
+    H --> J[Firebase Auth]
+
+    K[TanStack Query Provider] --> C
+    K --> D
+
+    G --> L[TMDB API]
 ```
 
-## Cloudflare Workers Deploy
+## How to Run This App
 
-Primary deploy path is Cloudflare Workers.
+### Prerequisites
 
-### Manual Deploy
+- Node.js 22+
+- pnpm 10+
+
+### Environment Variables (`.env`)
+
+Create a `.env` file in the project root with:
+
+```bash
+VITE_TMDB_API_KEY=
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+### Local Commands
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm run dev
+```
+
+Quality/build commands:
+
+```bash
 pnpm run check
-pnpm run deploy:workers
+pnpm run build
+pnpm run preview
 ```
 
-`wrangler` requires `CLOUDFLARE_API_TOKEN` in non-interactive environments.
+## Cloudflare Workers Deployment
 
-### GitHub Auto Deploy (main)
+This project deploys on Cloudflare Workers using Git-connected builds on `main`.
 
-This repo includes a workflow that deploys on push to `main`.
+### Build Configuration
 
-Required GitHub repository secrets:
+- Build command: `pnpm run build`
+- Deploy command: `npx wrangler deploy`
+- Production domain: `https://cinewatch.saddathasan.dev`
 
-- `CLOUDFLARE_API_TOKEN`
-- `VITE_TMDB_API_KEY`
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
+### Required Cloudflare Variables
 
-Optional secret:
+Set the same `VITE_*` keys in:
 
-- `CLOUDFLARE_ACCOUNT_ID`
+- Build variables (required for `pnpm run build`)
+- Runtime variables/secrets (recommended for consistency)
 
-### Custom Domain + Firebase
+Also ensure Firebase Auth authorized domains include:
 
-- Bind route/domain `cinewatch.saddathasan.dev/*` to the Worker in Cloudflare.
-- Ensure DNS for `cinewatch.saddathasan.dev` is proxied.
-- Add both worker host and `cinewatch.saddathasan.dev` to Firebase Auth authorized domains.
+- `cinewatch.saddathasan.dev`
 
-## Testing
+## Submission Checklist
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+- Public GitHub repository containing the source code
+- `README.md` with run instructions and basic documentation
+- Demo video link:
+  - Google Drive: `<add-link>`
 
-```bash
-pnpm test
-```
+## Known Limitations
 
-## Styling
+- TMDB API rate limits can affect frequent/high-volume requests
+- Current build emits large chunk-size warnings; further code splitting can improve this
+- Automated test coverage is currently minimal (`pnpm run test` has no comprehensive suite yet)
+- Firebase authentication behavior depends on correct domain allowlist setup
+- Password reset emails may occasionally land in spam folders depending on email provider filtering
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+## Security Note
 
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
-
-## Linting & Formatting
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
-
-```bash
-pnpm lint
-pnpm format
-pnpm check
-```
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
-
-```bash
-pnpm dlx shadcn@latest add button
-```
-
-## T3Env
-
-- You can use T3Env to add type safety to your environment variables.
-- Add Environment variables to the `src/env.mjs` file.
-- Use the environment variables in your code.
-
-### Usage
-
-```ts
-import { env } from '#/env'
-
-console.log(env.VITE_APP_TITLE)
-```
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from '@tanstack/react-router'
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+- No credentials should be committed to the repository
+- All API keys and service configuration are expected through environment variables
