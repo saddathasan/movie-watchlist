@@ -4,7 +4,7 @@ CineWatch is a movie discovery and watchlist application built for a frontend in
 
 Live URL (production): [https://cinewatch.saddathasan.dev](https://cinewatch.saddathasan.dev)
 
-Demo video (Google Drive): [<add-link>](add-link)
+Demo video (Google Drive): [https://drive.google.com/file/d/1S0NiLE5_s33p2iH65DbvccQkuNsnmz9j/view?usp=sharing](https://drive.google.com/file/d/1S0NiLE5_s33p2iH65DbvccQkuNsnmz9j/view?usp=sharing)
 
 ## Intro
 
@@ -192,7 +192,7 @@ Also ensure Firebase Auth authorized domains include:
 - Public GitHub repository containing the source code
 - `README.md` with run instructions and basic documentation
 - Demo video link:
-  - Google Drive: `<add-link>`
+  - Google Drive: `https://drive.google.com/file/d/1S0NiLE5_s33p2iH65DbvccQkuNsnmz9j/view?usp=sharing`
 
 ## Known Limitations
 
