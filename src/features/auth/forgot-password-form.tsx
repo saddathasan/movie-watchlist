@@ -1,5 +1,6 @@
 import { Mail, RotateCcw } from 'lucide-react'
 
+import { AuthModeHeader } from './auth-mode-header'
 import { inputClass } from './password-input'
 
 interface ForgotPasswordFormProps {
@@ -23,15 +24,11 @@ export function ForgotPasswordForm({
 
   return (
     <div className="space-y-3">
-      <div className="mb-8">
-        <h2 className="font-display text-4xl leading-none text-foreground">
-          RESET <span className="text-primary">ACCESS</span>
-        </h2>
-        <p className="mt-3 font-form text-sm text-muted-foreground">
-          Enter your CineWatch email. If an account exists, we will send a reset
-          link.
-        </p>
-      </div>
+      <AuthModeHeader
+        kicker="Password reset"
+        subtitle="Enter your email. If an account exists, we'll send a reset link."
+        title="Let's get you back in."
+      />
 
       <div className="group relative">
         <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
@@ -56,12 +53,12 @@ export function ForgotPasswordForm({
           ? 'Sending reset link...'
           : canResend
             ? 'Send reset link'
-            : `Resend in ${cooldownSeconds}s`}
+            : `Try again in ${cooldownSeconds}s`}
         {isSubmitting ? null : <RotateCcw className="size-3.5" />}
       </button>
 
       <p className="mt-4 text-center font-form text-xs text-muted-foreground">
-        Remember your password?{' '}
+        Remembered it?{' '}
         <button
           className="cursor-pointer font-medium text-primary hover:underline"
           type="button"

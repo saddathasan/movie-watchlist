@@ -1,4 +1,4 @@
-Welcome to Cinewatch, your one-stop movie watchlist manager. 
+Welcome to Cinewatch, your one-stop movie watchlist manager.
 
 # Getting Started
 

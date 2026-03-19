@@ -34,7 +34,7 @@ export function MovieDetailInfo({
     >
       {/* Poster */}
       <div className="shrink-0">
-        <div className="w-48 md:w-64 mx-auto md:mx-0 overflow-hidden rounded-lg shadow-card">
+        <div className="w-48 overflow-hidden rounded-lg shadow-card md:w-64">
           {poster ? (
             <img alt={movie.title} className="w-full h-auto" src={poster} />
           ) : (
